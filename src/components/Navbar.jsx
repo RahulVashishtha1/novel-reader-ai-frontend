@@ -68,7 +68,12 @@ const Navbar = () => {
                       🛠️ Tools
                     </button>
                   )}
-                  <span className="mr-4">{user?.name}</span>
+                  <Link
+                    to="/profile"
+                    className="mr-4 px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700"
+                  >
+                    👤 {user?.name}
+                  </Link>
                   <button
                     onClick={handleLogout}
                     className="px-3 py-2 rounded-md text-sm font-medium bg-red-600 hover:bg-red-700"
@@ -173,9 +178,13 @@ const Navbar = () => {
           <div className="pt-4 pb-3 border-t border-gray-700">
             {isAuthenticated ? (
               <div className="px-2 space-y-1">
-                <div className="block px-3 py-2 text-base font-medium">
-                  {user?.name}
-                </div>
+                <Link
+                  to="/profile"
+                  className="block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-700"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  👤 Profile
+                </Link>
                 <button
                   onClick={() => {
                     handleLogout();

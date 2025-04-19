@@ -34,8 +34,11 @@ export const authAPI = {
 // User API
 export const userAPI = {
   getProfile: () => api.get('/users/profile'),
+  updateProfile: (userData) => api.patch('/users/profile', userData),
   getStats: () => api.get('/users/stats'),
   updateStats: (statsData) => api.patch('/users/stats', statsData),
+  getReadingPreferences: () => api.get('/users/preferences'),
+  updateReadingPreferences: (preferencesData) => api.patch('/users/preferences', preferencesData),
   getAllUsers: () => api.get('/users/all'),
   deleteUser: (userId) => api.delete(`/users/${userId}`),
 };
@@ -67,6 +70,25 @@ export const imageAPI = {
   generateImage: (novelId, page, style) => api.post(`/images/${novelId}/page/${page}`, { style }),
   getImagesForPage: (novelId, page) => api.get(`/images/${novelId}/page/${page}`),
   getAllImageLogs: () => api.get('/images/logs'),
+};
+
+// Annotation API
+export const annotationAPI = {
+  getAnnotations: (novelId) => api.get(`/annotations/novels/${novelId}`),
+  getPageAnnotations: (novelId, page) => api.get(`/annotations/novels/${novelId}/pages/${page}`),
+  createAnnotation: (novelId, annotationData) => api.post(`/annotations/novels/${novelId}`, annotationData),
+  updateAnnotation: (annotationId, annotationData) => api.patch(`/annotations/${annotationId}`, annotationData),
+  deleteAnnotation: (annotationId) => api.delete(`/annotations/${annotationId}`),
+};
+
+// Sharing API
+export const sharingAPI = {
+  getSharedContent: (shareId) => api.get(`/sharing/${shareId}`),
+  sharePassage: (novelId, passageData) => api.post(`/sharing/novels/${novelId}/passage`, passageData),
+  shareProgress: (novelId, progressData) => api.post(`/sharing/novels/${novelId}/progress`, progressData),
+  generateSocialImage: (shareId) => api.post(`/sharing/${shareId}/social-image`),
+  getUserSharedContent: () => api.get('/sharing/user/all'),
+  deleteSharedContent: (shareId) => api.delete(`/sharing/${shareId}`),
 };
 
 export default api;

@@ -2,7 +2,9 @@ import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { getCurrentUser } from './features/auth/authSlice';
+import { getReadingPreferences } from './features/preferences/preferencesSlice';
 import { ToolsProvider } from './context/ToolsContext';
+import ThemeProvider from './components/ThemeProvider';
 
 // Components
 import Navbar from './components/Navbar';
@@ -16,8 +18,10 @@ import Bookshelf from './pages/Bookshelf';
 import Reader from './pages/Reader';
 import Statistics from './pages/Statistics';
 import Admin from './pages/Admin';
+import Profile from './pages/Profile';
 import Unauthorized from './pages/Unauthorized';
 import NotFound from './pages/NotFound';
+import Share from './pages/Share';
 
 function App() {
   const dispatch = useDispatch();
@@ -26,20 +30,23 @@ function App() {
     // Check if user is logged in on app load
     if (localStorage.getItem('token')) {
       dispatch(getCurrentUser());
+      dispatch(getReadingPreferences());
     }
   }, [dispatch]);
 
   return (
     <Router>
       <ToolsProvider>
-        <div className="min-h-screen flex flex-col">
-          <Navbar />
-          <main className="flex-grow">
+        <ThemeProvider>
+          <div className="min-h-screen flex flex-col themed-bg-secondary">
+            <Navbar />
+            <main className="flex-grow">
             <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/unauthorized" element={<Unauthorized />} />
+            <Route path="/share/:shareId" element={<Share />} />
 
             {/* Protected Routes */}
             <Route
@@ -67,6 +74,14 @@ function App() {
               }
             />
             <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/admin"
               element={
                 <ProtectedRoute requireAdmin={true}>
@@ -78,8 +93,9 @@ function App() {
             {/* 404 Route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </main>
-      </div>
+            </main>
+          </div>
+        </ThemeProvider>
       </ToolsProvider>
     </Router>
   );

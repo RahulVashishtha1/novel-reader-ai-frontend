@@ -2,6 +2,11 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTools } from '../context/ToolsContext';
+import ReadingSettingsPanel from '../components/ReadingSettingsPanel';
+import TextHighlighter from '../components/TextHighlighter';
+import AnnotationsList from '../components/AnnotationsList';
+import SharePassageModal from '../components/SharePassageModal';
+import ShareProgressCard from '../components/ShareProgressCard';
 import {
   getNovel,
   getNovelPage,
@@ -11,6 +16,7 @@ import {
   clearCurrentNovel,
 } from '../features/novels/novelSlice';
 import { generateImage, getImagesForPage, clearCurrentImages } from '../features/images/imageSlice';
+import { getPageAnnotations, clearAnnotations } from '../features/annotations/annotationsSlice';
 import BookmarkList from '../components/BookmarkList';
 import NotesList from '../components/NotesList';
 import ImageGenerator from '../components/ImageGenerator';
@@ -28,10 +34,15 @@ const Reader = () => {
   const [readingTime, setReadingTime] = useState(0);
   const [autoPage, setAutoPage] = useState(false);
   const [autoPageInterval, setAutoPageInterval] = useState(10); // seconds
-  const [readingMode, setReadingMode] = useState('single'); // 'single' or 'continuous'
+  const [readingMode, setReadingMode] = useState('single'); // 'single', 'continuous', 'scroll', or 'paginated'
   const [continuousContent, setContinuousContent] = useState([]);
   const [autoGenerateImage, setAutoGenerateImage] = useState(false);
   const [scrollToPage, setScrollToPage] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showAnnotations, setShowAnnotations] = useState(false);
+  const [showSharePassage, setShowSharePassage] = useState(false);
+  const [showShareProgress, setShowShareProgress] = useState(false);
+  const [selectedPassage, setSelectedPassage] = useState('');
 
   const readingTimeRef = useRef(null);
   const autoPageRef = useRef(null);
@@ -58,6 +69,9 @@ const Reader = () => {
 
           // Load images for the current page
           dispatch(getImagesForPage({ novelId: id, page: lastPage }));
+
+          // Load annotations for the current page
+          dispatch(getPageAnnotations({ novelId: id, page: lastPage }));
         })
         .catch(() => {
           // Error is handled in the slice
@@ -79,6 +93,7 @@ const Reader = () => {
       }
       dispatch(clearCurrentNovel());
       dispatch(clearCurrentImages());
+      dispatch(clearAnnotations());
     };
   }, [dispatch, id]);
 
@@ -162,6 +177,9 @@ const Reader = () => {
     // Load images for the new page
     dispatch(getImagesForPage({ novelId: id, page: validatedPage }));
 
+    // Load annotations for the new page
+    dispatch(getPageAnnotations({ novelId: id, page: validatedPage }));
+
     // Generate image if auto-generate is enabled
     if (autoGenerateImage && currentNovel) {
       dispatch(generateImage({ novelId: currentNovel._id, page: validatedPage, style: 'default' }));
@@ -239,17 +257,25 @@ const Reader = () => {
     setAutoGenerateImage(!autoGenerateImage);
   };
 
-  const toggleReadingMode = () => {
-    const newMode = readingMode === 'single' ? 'continuous' : 'single';
-    setReadingMode(newMode);
+  // Set reading mode
+  const setReaderMode = (mode) => {
+    if (mode === readingMode) return;
 
-    // If switching to continuous mode, load multiple pages
-    if (newMode === 'continuous' && currentNovel) {
+    setReadingMode(mode);
+
+    // If switching to continuous or scroll mode, load multiple pages
+    if ((mode === 'continuous' || mode === 'scroll') && currentNovel) {
       loadContinuousContent(currentPage);
     } else {
-      // If switching to single mode, clear continuous content
+      // If switching to single or paginated mode, clear continuous content
       setContinuousContent([]);
     }
+  };
+
+  // Legacy toggle function for backward compatibility
+  const toggleReadingMode = () => {
+    const newMode = readingMode === 'single' ? 'continuous' : 'single';
+    setReaderMode(newMode);
   };
 
   // Function to load multiple pages for continuous mode
@@ -284,14 +310,33 @@ const Reader = () => {
     setScrollToPage(!scrollToPage);
   };
 
+  // Handle sharing a passage
+  const handleSharePassage = () => {
+    // Get the current page content
+    const content = readingMode === 'continuous' && continuousContent.length > 0
+      ? continuousContent.find(item => item.page === currentPage)?.content || pageData.content
+      : pageData.content;
+
+    // Get the current image ID if available
+    const currentImage = currentImages.length > 0 ? currentImages[0] : null;
+
+    setSelectedPassage(content);
+    setShowSharePassage(true);
+  };
+
+  // Handle sharing reading progress
+  const handleShareProgress = () => {
+    setShowShareProgress(true);
+  };
+
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
+    <div className="min-h-screen themed-bg-secondary flex flex-col">
 
       {/* Main content */}
       <div className="flex-grow flex flex-col md:flex-row h-[calc(100vh-64px)]" style={{ height: 'calc(100vh - 64px)' }}>
         {/* Tools panel (conditionally shown) */}
         {showTools && (
-          <div className="w-full md:w-64 bg-white shadow-md p-4 absolute right-0 top-16 z-10 md:relative">
+          <div className="w-full md:w-64 themed-bg-primary shadow-md p-4 absolute right-0 top-16 z-10 md:relative themed-text-primary">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-semibold text-gray-700">Tools</h3>
               <button
@@ -349,20 +394,72 @@ const Reader = () => {
 
               <div>
                 <h4 className="font-medium text-gray-700 mb-2">Reading Mode</h4>
-                <div className="flex space-x-2">
+                <div className="grid grid-cols-2 gap-2 mb-2">
                   <button
-                    onClick={() => readingMode !== 'single' && toggleReadingMode()}
-                    className={`flex-1 py-2 px-4 rounded-md transition ${readingMode === 'single' ? 'bg-blue-600 text-white font-bold' : 'bg-gray-200 text-gray-700'}`}
+                    onClick={() => setReaderMode('single')}
+                    className={`py-2 px-3 rounded-md transition ${readingMode === 'single' ? 'bg-blue-600 text-white font-bold' : 'bg-gray-200 text-gray-700'}`}
                   >
                     Single Page
                   </button>
                   <button
-                    onClick={() => readingMode !== 'continuous' && toggleReadingMode()}
-                    className={`flex-1 py-2 px-4 rounded-md transition ${readingMode === 'continuous' ? 'bg-blue-600 text-white font-bold' : 'bg-gray-200 text-gray-700'}`}
+                    onClick={() => setReaderMode('continuous')}
+                    className={`py-2 px-3 rounded-md transition ${readingMode === 'continuous' ? 'bg-blue-600 text-white font-bold' : 'bg-gray-200 text-gray-700'}`}
                   >
                     Continuous
                   </button>
+                  <button
+                    onClick={() => setReaderMode('scroll')}
+                    className={`py-2 px-3 rounded-md transition ${readingMode === 'scroll' ? 'bg-blue-600 text-white font-bold' : 'bg-gray-200 text-gray-700'}`}
+                  >
+                    Scrollable
+                  </button>
+                  <button
+                    onClick={() => setReaderMode('paginated')}
+                    className={`py-2 px-3 rounded-md transition ${readingMode === 'paginated' ? 'bg-blue-600 text-white font-bold' : 'bg-gray-200 text-gray-700'}`}
+                  >
+                    Paginated
+                  </button>
                 </div>
+              </div>
+
+              <div>
+                <h4 className="font-medium text-gray-700 mb-2">Annotations</h4>
+                <button
+                  onClick={() => {
+                    setShowAnnotations(!showAnnotations);
+                    setShowBookmarks(false);
+                    setShowNotes(false);
+                  }}
+                  className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 transition text-left"
+                >
+                  View Annotations
+                </button>
+              </div>
+
+              <div>
+                <h4 className="font-medium text-gray-700 mb-2">Share</h4>
+                <button
+                  onClick={handleSharePassage}
+                  className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 transition text-left mb-2"
+                >
+                  Share Passage
+                </button>
+                <button
+                  onClick={handleShareProgress}
+                  className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 transition text-left"
+                >
+                  Share Progress
+                </button>
+              </div>
+
+              <div>
+                <h4 className="font-medium text-gray-700 mb-2">Display Settings</h4>
+                <button
+                  onClick={() => setShowSettings(true)}
+                  className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 transition text-left"
+                >
+                  Customize Appearance
+                </button>
               </div>
             </div>
 
@@ -426,7 +523,7 @@ const Reader = () => {
         <div className="flex-grow flex flex-col md:flex-row p-4 overflow-hidden">
           {/* Left column - Text reader */}
           <div className="flex-1 flex flex-col mr-0 md:mr-4 mb-4 md:mb-0 h-full">
-            <div id="novel-content" className="bg-white shadow-md rounded-lg p-6 flex-grow overflow-auto" style={{ maxHeight: 'calc(100vh - 250px)' }}>
+            <div id="novel-content" className="themed-bg-primary shadow-md rounded-lg p-6 flex-grow overflow-auto themed-text-primary" style={{ maxHeight: 'calc(100vh - 250px)' }}>
               <h1 className="text-2xl font-bold text-gray-900 mb-4 truncate">
                 {currentNovel?.title || 'Loading...'}
               </h1>
@@ -448,19 +545,70 @@ const Reader = () => {
                       <div className="text-sm text-gray-500 mb-2 border-t pt-2">
                         Page {item.page}
                       </div>
-                      <pre className="whitespace-pre-wrap text-lg leading-relaxed font-sans">{item.content}</pre>
+                      <TextHighlighter
+                        content={item.content}
+                        novelId={id}
+                        page={item.page}
+                      />
                     </div>
                   ))}
                 </div>
-              ) : (
-                <div className="prose max-w-none">
-                  <pre className="whitespace-pre-wrap text-lg leading-relaxed font-sans">{pageData.content}</pre>
+              ) : readingMode === 'scroll' && continuousContent.length > 0 ? (
+                <div className="prose max-w-none overflow-y-auto" style={{ maxHeight: 'calc(100vh - 250px)' }}>
+                  {continuousContent.map((item, index) => (
+                    <div key={item.page} className="mb-8">
+                      <div className="text-sm text-gray-500 mb-2 border-t pt-2 sticky top-0 bg-white dark:bg-gray-800 py-1 z-10">
+                        Page {item.page}
+                      </div>
+                      <TextHighlighter
+                        content={item.content}
+                        novelId={id}
+                        page={item.page}
+                      />
+                    </div>
+                  ))}
                 </div>
+              ) : readingMode === 'paginated' ? (
+                <div className="prose max-w-none h-full flex flex-col justify-between">
+                  <div className="flex-grow overflow-hidden">
+                    <TextHighlighter
+                      content={pageData.content}
+                      novelId={id}
+                      page={currentPage}
+                    />
+                  </div>
+                  <div className="flex justify-between items-center mt-4 pt-2 border-t border-gray-200">
+                    <button
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage <= 1}
+                      className="text-blue-600 disabled:text-gray-400"
+                    >
+                      ← Previous Page
+                    </button>
+                    <span className="text-sm text-gray-500">
+                      Page {currentPage} of {currentNovel?.totalPages || '?'}
+                    </span>
+                    <button
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage >= (currentNovel?.totalPages || 1)}
+                      className="text-blue-600 disabled:text-gray-400"
+                    >
+                      Next Page →
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <TextHighlighter
+                  content={pageData.content}
+                  novelId={id}
+                  page={currentPage}
+                />
               )}
             </div>
 
-            {/* Navigation controls at the bottom */}
-            <div className="bg-white shadow-md rounded-lg p-4 mt-4">
+            {/* Navigation controls at the bottom (hidden in paginated mode) */}
+            {readingMode !== 'paginated' && (
+              <div className="themed-bg-primary shadow-md rounded-lg p-4 mt-4 themed-text-primary">
               <div className="flex flex-col space-y-4">
                 {/* Page navigation */}
                 <div className="flex items-center justify-between">
@@ -579,27 +727,48 @@ const Reader = () => {
 
                     <div className="flex items-center space-x-2 mt-2 sm:mt-0">
                       <span className="mr-2">Mode:</span>
+                      <div className="flex space-x-1 overflow-x-auto">
+                        <button
+                          onClick={() => setReaderMode('single')}
+                          className={`px-3 py-1 text-sm rounded-md transition whitespace-nowrap ${readingMode === 'single' ? 'bg-blue-600 text-white font-bold' : 'bg-gray-200 text-gray-700'}`}
+                        >
+                          Single
+                        </button>
+                        <button
+                          onClick={() => setReaderMode('continuous')}
+                          className={`px-3 py-1 text-sm rounded-md transition whitespace-nowrap ${readingMode === 'continuous' ? 'bg-blue-600 text-white font-bold' : 'bg-gray-200 text-gray-700'}`}
+                        >
+                          Continuous
+                        </button>
+                        <button
+                          onClick={() => setReaderMode('scroll')}
+                          className={`px-3 py-1 text-sm rounded-md transition whitespace-nowrap ${readingMode === 'scroll' ? 'bg-blue-600 text-white font-bold' : 'bg-gray-200 text-gray-700'}`}
+                        >
+                          Scroll
+                        </button>
+                        <button
+                          onClick={() => setReaderMode('paginated')}
+                          className={`px-3 py-1 text-sm rounded-md transition whitespace-nowrap ${readingMode === 'paginated' ? 'bg-blue-600 text-white font-bold' : 'bg-gray-200 text-gray-700'}`}
+                        >
+                          Paginated
+                        </button>
+                      </div>
                       <button
-                        onClick={() => readingMode !== 'single' && toggleReadingMode()}
-                        className={`px-3 py-1 text-sm rounded-md transition ${readingMode === 'single' ? 'bg-blue-600 text-white font-bold' : 'bg-gray-200 text-gray-700'}`}
+                        onClick={() => setShowSettings(true)}
+                        className="px-3 py-1 text-sm rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 transition ml-2"
                       >
-                        Single
-                      </button>
-                      <button
-                        onClick={() => readingMode !== 'continuous' && toggleReadingMode()}
-                        className={`px-3 py-1 text-sm rounded-md transition ${readingMode === 'continuous' ? 'bg-blue-600 text-white font-bold' : 'bg-gray-200 text-gray-700'}`}
-                      >
-                        Continuous
+                        <span role="img" aria-label="Settings">⚙️</span> Theme
                       </button>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
+            )}
           </div>
 
           {/* Right column - Image display */}
-          <div className="w-full md:w-1/3 bg-white shadow-md rounded-lg p-4 flex flex-col" style={{ maxHeight: 'calc(100vh - 80px)' }}>
+          <div className="w-full md:w-1/3 themed-bg-primary shadow-md rounded-lg p-4 flex flex-col themed-text-primary" style={{ maxHeight: 'calc(100vh - 80px)' }}>
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-semibold text-gray-700">AI Generated Image</h3>
               <label className="flex items-center text-sm">
@@ -665,6 +834,49 @@ const Reader = () => {
                 onClose={() => setShowNotes(false)}
               />
             </div>
+          </div>
+        )}
+
+        {/* Reading Settings Modal */}
+        {showSettings && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <ReadingSettingsPanel onClose={() => setShowSettings(false)} />
+          </div>
+        )}
+
+        {/* Annotations Modal */}
+        {showAnnotations && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full max-h-[80vh] overflow-y-auto">
+              <AnnotationsList
+                novelId={currentNovel?._id}
+                onNavigate={handlePageChange}
+                onClose={() => setShowAnnotations(false)}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Share Passage Modal */}
+        {showSharePassage && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <SharePassageModal
+              novelId={currentNovel?._id}
+              page={currentPage}
+              content={selectedPassage}
+              imageId={currentImages.length > 0 ? currentImages[0]._id : null}
+              onClose={() => setShowSharePassage(false)}
+            />
+          </div>
+        )}
+
+        {/* Share Progress Modal */}
+        {showShareProgress && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <ShareProgressCard
+              novelId={currentNovel?._id}
+              onClose={() => setShowShareProgress(false)}
+            />
           </div>
         )}
       </div>
