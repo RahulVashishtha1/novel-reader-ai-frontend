@@ -29,12 +29,21 @@ export const updateReadingPreferences = createAsyncThunk(
 // Initial state
 const initialState = {
   preferences: {
+    // Appearance preferences
     theme: 'light',
     fontSize: 16,
     fontFamily: 'system-ui',
     lineSpacing: 1.5,
     letterSpacing: 0,
     dyslexiaFriendly: false,
+
+    // Layout preferences
+    layout: 'standard', // 'standard', 'compact', or 'expanded'
+    imagePosition: 'right', // 'right', 'left', 'bottom', or 'hidden'
+    imageSize: 'medium', // 'small', 'medium', or 'large'
+    toolbarPosition: 'right', // 'right', 'left', 'top', or 'hidden'
+    showPageNumbers: true,
+    fullWidth: false,
   },
   loading: false,
   error: null,
@@ -45,6 +54,7 @@ const preferencesSlice = createSlice({
   name: 'preferences',
   initialState,
   reducers: {
+    // Appearance preferences
     setTheme: (state, action) => {
       state.preferences.theme = action.payload;
     },
@@ -63,6 +73,28 @@ const preferencesSlice = createSlice({
     setDyslexiaFriendly: (state, action) => {
       state.preferences.dyslexiaFriendly = action.payload;
     },
+
+    // Layout preferences
+    setLayout: (state, action) => {
+      state.preferences.layout = action.payload;
+    },
+    setImagePosition: (state, action) => {
+      state.preferences.imagePosition = action.payload;
+    },
+    setImageSize: (state, action) => {
+      state.preferences.imageSize = action.payload;
+    },
+    setToolbarPosition: (state, action) => {
+      state.preferences.toolbarPosition = action.payload;
+    },
+    setShowPageNumbers: (state, action) => {
+      state.preferences.showPageNumbers = action.payload;
+    },
+    setFullWidth: (state, action) => {
+      state.preferences.fullWidth = action.payload;
+    },
+
+    // Error handling
     clearPreferencesError: (state) => {
       state.error = null;
     },
@@ -99,12 +131,23 @@ const preferencesSlice = createSlice({
 });
 
 export const {
+  // Appearance preferences
   setTheme,
   setFontSize,
   setFontFamily,
   setLineSpacing,
   setLetterSpacing,
   setDyslexiaFriendly,
+
+  // Layout preferences
+  setLayout,
+  setImagePosition,
+  setImageSize,
+  setToolbarPosition,
+  setShowPageNumbers,
+  setFullWidth,
+
+  // Error handling
   clearPreferencesError,
 } = preferencesSlice.actions;
 

@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTools } from '../context/ToolsContext';
 import ReadingSettingsPanel from '../components/ReadingSettingsPanel';
+import LayoutSettingsPanel from '../components/LayoutSettingsPanel';
 import TextHighlighter from '../components/TextHighlighter';
 import AnnotationsList from '../components/AnnotationsList';
 import SharePassageModal from '../components/SharePassageModal';
@@ -39,6 +40,7 @@ const Reader = () => {
   const [autoGenerateImage, setAutoGenerateImage] = useState(false);
   const [scrollToPage, setScrollToPage] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showLayoutSettings, setShowLayoutSettings] = useState(false);
   const [showAnnotations, setShowAnnotations] = useState(false);
   const [showSharePassage, setShowSharePassage] = useState(false);
   const [showShareProgress, setShowShareProgress] = useState(false);
@@ -49,6 +51,7 @@ const Reader = () => {
 
   const { currentNovel, currentPage: pageData, loading, error } = useSelector((state) => state.novels);
   const { currentImages, generatingImage } = useSelector((state) => state.images);
+  const { preferences } = useSelector((state) => state.preferences);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -330,13 +333,19 @@ const Reader = () => {
   };
 
   return (
-    <div className="min-h-screen themed-bg-secondary flex flex-col">
+    <div className={`min-h-screen themed-bg-secondary flex flex-col ${preferences?.fullWidth ? 'max-w-none' : 'max-w-7xl mx-auto'}`}>
 
       {/* Main content */}
       <div className="flex-grow flex flex-col md:flex-row h-[calc(100vh-64px)]" style={{ height: 'calc(100vh - 64px)' }}>
         {/* Tools panel (conditionally shown) */}
         {showTools && (
-          <div className="w-full md:w-64 themed-bg-primary shadow-md p-4 absolute right-0 top-16 z-10 md:relative themed-text-primary">
+          <div className={`
+            w-full md:w-64 themed-bg-primary shadow-md p-4 z-10 themed-text-primary
+            ${preferences?.toolbarPosition === 'hidden' ? 'hidden' : ''}
+            ${preferences?.toolbarPosition === 'top' ? 'w-full h-auto' : 'absolute md:relative'}
+            ${preferences?.toolbarPosition === 'left' ? 'order-first left-0' : 'right-0'}
+            ${preferences?.toolbarPosition !== 'top' ? 'top-16' : 'top-0'}
+          `}>
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-semibold text-gray-700">Tools</h3>
               <button
@@ -456,9 +465,15 @@ const Reader = () => {
                 <h4 className="font-medium text-gray-700 mb-2">Display Settings</h4>
                 <button
                   onClick={() => setShowSettings(true)}
-                  className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 transition text-left"
+                  className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 transition text-left mb-2"
                 >
                   Customize Appearance
+                </button>
+                <button
+                  onClick={() => setShowLayoutSettings(true)}
+                  className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 transition text-left"
+                >
+                  Customize Layout
                 </button>
               </div>
             </div>
@@ -519,11 +534,23 @@ const Reader = () => {
           </div>
         )}
 
-        {/* Two-column layout for reading */}
-        <div className="flex-grow flex flex-col md:flex-row p-4 overflow-hidden">
-          {/* Left column - Text reader */}
-          <div className="flex-1 flex flex-col mr-0 md:mr-4 mb-4 md:mb-0 h-full">
-            <div id="novel-content" className="themed-bg-primary shadow-md rounded-lg p-6 flex-grow overflow-auto themed-text-primary" style={{ maxHeight: 'calc(100vh - 250px)' }}>
+        {/* Customizable layout for reading */}
+        <div className={`
+          flex-grow flex flex-col ${preferences?.layout !== 'compact' ? 'p-4' : 'p-2'} overflow-hidden
+          ${preferences?.imagePosition === 'bottom' ? 'md:flex-col' : 'md:flex-row'}
+          ${preferences?.layout === 'expanded' ? 'space-x-6 space-y-6' : ''}
+        `}>
+          {/* Text reader column - position based on preferences */}
+          <div className={`
+            flex-1 flex flex-col h-full
+            ${preferences?.imagePosition === 'left' ? 'md:order-last md:ml-4' : 'md:mr-4'}
+            ${preferences?.imagePosition === 'bottom' ? 'mb-4' : 'md:mb-0'}
+            ${preferences?.layout === 'compact' ? 'mr-0 mb-2' : 'mb-4'}
+          `}>
+            <div id="novel-content" className={`
+              themed-bg-primary shadow-md rounded-lg flex-grow overflow-auto themed-text-primary
+              ${preferences?.layout === 'compact' ? 'p-3' : preferences?.layout === 'expanded' ? 'p-8' : 'p-6'}
+            `} style={{ maxHeight: 'calc(100vh - 250px)' }}>
               <h1 className="text-2xl font-bold text-gray-900 mb-4 truncate">
                 {currentNovel?.title || 'Loading...'}
               </h1>
@@ -540,7 +567,7 @@ const Reader = () => {
                 </div>
               ) : readingMode === 'continuous' && continuousContent.length > 0 ? (
                 <div className="prose max-w-none">
-                  {continuousContent.map((item, index) => (
+                  {continuousContent.map((item) => (
                     <div key={item.page} className="mb-8">
                       <div className="text-sm text-gray-500 mb-2 border-t pt-2">
                         Page {item.page}
@@ -555,7 +582,7 @@ const Reader = () => {
                 </div>
               ) : readingMode === 'scroll' && continuousContent.length > 0 ? (
                 <div className="prose max-w-none overflow-y-auto" style={{ maxHeight: 'calc(100vh - 250px)' }}>
-                  {continuousContent.map((item, index) => (
+                  {continuousContent.map((item) => (
                     <div key={item.page} className="mb-8">
                       <div className="text-sm text-gray-500 mb-2 border-t pt-2 sticky top-0 bg-white dark:bg-gray-800 py-1 z-10">
                         Page {item.page}
@@ -653,7 +680,6 @@ const Reader = () => {
                       if (readingMode === 'continuous' && continuousContent.length > 0) {
                         // In continuous mode, move forward by the number of pages displayed
                         const lastPage = continuousContent[continuousContent.length - 1]?.page || currentPage;
-                        const pagesToMove = Math.max(3, continuousContent.length);
                         handlePageChange(Math.min(currentNovel?.totalPages || 1, lastPage + 1));
                       } else {
                         // In single mode, just move forward one page
@@ -767,8 +793,14 @@ const Reader = () => {
             )}
           </div>
 
-          {/* Right column - Image display */}
-          <div className="w-full md:w-1/3 themed-bg-primary shadow-md rounded-lg p-4 flex flex-col themed-text-primary" style={{ maxHeight: 'calc(100vh - 80px)' }}>
+          {/* Image display column - position and size based on preferences */}
+          {preferences?.imagePosition !== 'hidden' && (
+            <div className={`
+              themed-bg-primary shadow-md rounded-lg p-4 flex flex-col themed-text-primary
+              ${preferences?.imagePosition === 'bottom' ? 'w-full' : 'w-full'}
+              ${preferences?.imageSize === 'small' ? 'md:w-1/4' : preferences?.imageSize === 'large' ? 'md:w-1/2' : 'md:w-1/3'}
+              ${preferences?.layout === 'compact' ? 'p-2' : preferences?.layout === 'expanded' ? 'p-6' : 'p-4'}
+            `} style={{ maxHeight: preferences?.imagePosition === 'bottom' ? '300px' : 'calc(100vh - 80px)' }}>
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-semibold text-gray-700">AI Generated Image</h3>
               <label className="flex items-center text-sm">
@@ -808,6 +840,7 @@ const Reader = () => {
               </div>
             )}
           </div>
+          )}
         </div>
 
         {/* Modals for bookmarks and notes */}
@@ -841,6 +874,13 @@ const Reader = () => {
         {showSettings && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <ReadingSettingsPanel onClose={() => setShowSettings(false)} />
+          </div>
+        )}
+
+        {/* Layout Settings Modal */}
+        {showLayoutSettings && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <LayoutSettingsPanel onClose={() => setShowLayoutSettings(false)} />
           </div>
         )}
 
