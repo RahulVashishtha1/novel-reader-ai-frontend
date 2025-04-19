@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   setLayout,
@@ -12,7 +12,22 @@ import {
 const LayoutSettingsPanel = ({ onClose }) => {
   const dispatch = useDispatch();
   const { preferences } = useSelector((state) => state.preferences);
-  
+  const panelRef = useRef(null);
+
+  // Handle click outside to close
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (panelRef.current && !panelRef.current.contains(event.target)) {
+        onClose();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [onClose]);
+
   // Local state to track changes before saving
   const [localPreferences, setLocalPreferences] = useState({
     layout: preferences?.layout || 'standard',
@@ -41,7 +56,7 @@ const LayoutSettingsPanel = ({ onClose }) => {
     dispatch(setToolbarPosition(localPreferences.toolbarPosition));
     dispatch(setShowPageNumbers(localPreferences.showPageNumbers));
     dispatch(setFullWidth(localPreferences.fullWidth));
-    
+
     // Close the panel
     onClose();
   };
@@ -59,12 +74,12 @@ const LayoutSettingsPanel = ({ onClose }) => {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
+    <div ref={panelRef} className="themed-bg-primary rounded-lg shadow-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white">Layout Settings</h2>
+        <h2 className="text-xl font-bold themed-text-primary">Layout Settings</h2>
         <button
           onClick={onClose}
-          className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+          className="themed-text-secondary hover:themed-text-primary"
         >
           ✕
         </button>
@@ -73,20 +88,20 @@ const LayoutSettingsPanel = ({ onClose }) => {
       <div className="space-y-6">
         {/* Layout Preset */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-medium themed-text-primary mb-2">
             Layout Preset
           </label>
           <select
             name="layout"
             value={localPreferences.layout}
             onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            className="w-full px-3 py-2 border themed-border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 themed-bg-secondary themed-text-primary"
           >
             <option value="standard">Standard</option>
             <option value="compact">Compact</option>
             <option value="expanded">Expanded</option>
           </select>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          <p className="mt-1 text-sm themed-text-secondary">
             {localPreferences.layout === 'standard' && 'Balanced spacing and padding'}
             {localPreferences.layout === 'compact' && 'Minimal spacing to maximize content area'}
             {localPreferences.layout === 'expanded' && 'Extra spacing for comfortable reading'}
@@ -95,7 +110,7 @@ const LayoutSettingsPanel = ({ onClose }) => {
 
         {/* Image Position */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-medium themed-text-primary mb-2">
             Image Position
           </label>
           <div className="grid grid-cols-2 gap-2">
@@ -105,7 +120,7 @@ const LayoutSettingsPanel = ({ onClose }) => {
               className={`py-2 px-3 rounded-md transition ${
                 localPreferences.imagePosition === 'right'
                   ? 'bg-blue-600 text-white'
-                  : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+                  : 'themed-bg-secondary themed-text-primary'
               }`}
             >
               Right
@@ -116,7 +131,7 @@ const LayoutSettingsPanel = ({ onClose }) => {
               className={`py-2 px-3 rounded-md transition ${
                 localPreferences.imagePosition === 'left'
                   ? 'bg-blue-600 text-white'
-                  : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+                  : 'themed-bg-secondary themed-text-primary'
               }`}
             >
               Left
@@ -127,7 +142,7 @@ const LayoutSettingsPanel = ({ onClose }) => {
               className={`py-2 px-3 rounded-md transition ${
                 localPreferences.imagePosition === 'bottom'
                   ? 'bg-blue-600 text-white'
-                  : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+                  : 'themed-bg-secondary themed-text-primary'
               }`}
             >
               Bottom
@@ -138,7 +153,7 @@ const LayoutSettingsPanel = ({ onClose }) => {
               className={`py-2 px-3 rounded-md transition ${
                 localPreferences.imagePosition === 'hidden'
                   ? 'bg-blue-600 text-white'
-                  : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+                  : 'themed-bg-secondary themed-text-primary'
               }`}
             >
               Hidden
@@ -149,7 +164,7 @@ const LayoutSettingsPanel = ({ onClose }) => {
         {/* Image Size (only show if image is not hidden) */}
         {localPreferences.imagePosition !== 'hidden' && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium themed-text-primary mb-2">
               Image Size
             </label>
             <div className="grid grid-cols-3 gap-2">
@@ -159,7 +174,7 @@ const LayoutSettingsPanel = ({ onClose }) => {
                 className={`py-2 px-3 rounded-md transition ${
                   localPreferences.imageSize === 'small'
                     ? 'bg-blue-600 text-white'
-                    : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+                    : 'themed-bg-secondary themed-text-primary'
                 }`}
               >
                 Small
@@ -170,7 +185,7 @@ const LayoutSettingsPanel = ({ onClose }) => {
                 className={`py-2 px-3 rounded-md transition ${
                   localPreferences.imageSize === 'medium'
                     ? 'bg-blue-600 text-white'
-                    : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+                    : 'themed-bg-secondary themed-text-primary'
                 }`}
               >
                 Medium
@@ -181,7 +196,7 @@ const LayoutSettingsPanel = ({ onClose }) => {
                 className={`py-2 px-3 rounded-md transition ${
                   localPreferences.imageSize === 'large'
                     ? 'bg-blue-600 text-white'
-                    : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+                    : 'themed-bg-secondary themed-text-primary'
                 }`}
               >
                 Large
@@ -275,31 +290,31 @@ const LayoutSettingsPanel = ({ onClose }) => {
         {/* Preview */}
         <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
           <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Preview</h3>
-          <div 
+          <div
             className={`
-              bg-gray-100 dark:bg-gray-900 rounded-lg p-2 flex 
+              bg-gray-100 dark:bg-gray-900 rounded-lg p-2 flex
               ${localPreferences.imagePosition === 'bottom' ? 'flex-col' : 'flex-row'}
               ${localPreferences.layout === 'compact' ? 'gap-1' : localPreferences.layout === 'expanded' ? 'gap-4 p-4' : 'gap-2'}
             `}
             style={{ height: '120px' }}
           >
             {/* Text area */}
-            <div 
+            <div
               className={`
-                bg-white dark:bg-gray-800 rounded 
+                bg-white dark:bg-gray-800 rounded
                 ${localPreferences.imagePosition === 'left' ? 'order-last' : ''}
-                ${localPreferences.imagePosition === 'hidden' ? 'w-full' : 
+                ${localPreferences.imagePosition === 'hidden' ? 'w-full' :
                   localPreferences.imagePosition === 'bottom' ? 'h-2/3' : 'flex-1'}
               `}
             ></div>
-            
+
             {/* Image area */}
             {localPreferences.imagePosition !== 'hidden' && (
-              <div 
+              <div
                 className={`
                   bg-gray-200 dark:bg-gray-700 rounded flex items-center justify-center text-xs text-gray-500 dark:text-gray-400
                   ${localPreferences.imagePosition === 'bottom' ? 'h-1/3 w-full' : ''}
-                  ${localPreferences.imageSize === 'small' ? 'w-1/4' : 
+                  ${localPreferences.imageSize === 'small' ? 'w-1/4' :
                     localPreferences.imageSize === 'large' ? 'w-1/2' : 'w-1/3'}
                 `}
               >

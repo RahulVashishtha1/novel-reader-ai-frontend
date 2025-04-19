@@ -47,7 +47,9 @@ export const getUserProfile = createAsyncThunk(
       const response = await userAPI.getProfile();
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response.data.message || 'Failed to get user profile');
+      // Handle the error more safely
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to get user profile';
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -144,7 +146,10 @@ const authSlice = createSlice({
       })
       .addCase(getUserProfile.fulfilled, (state, action) => {
         state.loading = false;
+        console.log('💾 getUserProfile.fulfilled payload:', action.payload);
+        console.log('💾 Current user state:', state.user);
         state.user = { ...state.user, ...action.payload.user };
+        console.log('💾 Updated user state:', state.user);
       })
       .addCase(getUserProfile.rejected, (state, action) => {
         state.loading = false;

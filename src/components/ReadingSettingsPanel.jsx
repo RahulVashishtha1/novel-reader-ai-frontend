@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   updateReadingPreferences,
@@ -14,10 +14,25 @@ const ReadingSettingsPanel = ({ onClose }) => {
   const dispatch = useDispatch();
   const { preferences, loading } = useSelector((state) => state.preferences);
   const [localPreferences, setLocalPreferences] = useState(preferences);
+  const panelRef = useRef(null);
 
   useEffect(() => {
     setLocalPreferences(preferences);
   }, [preferences]);
+
+  // Handle click outside to close
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (panelRef.current && !panelRef.current.contains(event.target)) {
+        onClose();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [onClose]);
 
   const handleThemeChange = (theme) => {
     setLocalPreferences({ ...localPreferences, theme });
@@ -58,13 +73,37 @@ const ReadingSettingsPanel = ({ onClose }) => {
     onClose();
   };
 
+  const handleReset = () => {
+    const defaultPreferences = {
+      theme: 'light',
+      fontSize: 16,
+      fontFamily: 'system-ui',
+      lineSpacing: 1.5,
+      letterSpacing: 0,
+      dyslexiaFriendly: false,
+    };
+
+    setLocalPreferences(defaultPreferences);
+
+    // Apply default preferences immediately
+    dispatch(setTheme(defaultPreferences.theme));
+    dispatch(setFontSize(defaultPreferences.fontSize));
+    dispatch(setFontFamily(defaultPreferences.fontFamily));
+    dispatch(setLineSpacing(defaultPreferences.lineSpacing));
+    dispatch(setLetterSpacing(defaultPreferences.letterSpacing));
+    dispatch(setDyslexiaFriendly(defaultPreferences.dyslexiaFriendly));
+  };
+
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
+    <div ref={panelRef} className="themed-bg-primary rounded-lg shadow-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-bold">Reading Settings</h2>
+        <div>
+          <h2 className="text-xl font-bold themed-text-primary">Reading Settings</h2>
+          <p className="text-sm themed-text-secondary">These settings only apply to the book content</p>
+        </div>
         <button
           onClick={onClose}
-          className="text-gray-500 hover:text-gray-700"
+          className="themed-text-secondary hover:themed-text-primary"
         >
           ✕
         </button>
@@ -73,7 +112,7 @@ const ReadingSettingsPanel = ({ onClose }) => {
       <div className="space-y-6">
         {/* Theme Selection */}
         <div>
-          <h3 className="font-medium text-gray-700 mb-2">Theme</h3>
+          <h3 className="font-medium themed-text-primary mb-2">Theme</h3>
           <div className="flex space-x-2">
             <button
               onClick={() => handleThemeChange('light')}
@@ -111,8 +150,8 @@ const ReadingSettingsPanel = ({ onClose }) => {
         {/* Font Size */}
         <div>
           <div className="flex justify-between mb-2">
-            <h3 className="font-medium text-gray-700">Font Size</h3>
-            <span className="text-gray-500">{localPreferences.fontSize}px</span>
+            <h3 className="font-medium themed-text-primary">Font Size</h3>
+            <span className="themed-text-secondary">{localPreferences.fontSize}px</span>
           </div>
           <input
             type="range"
@@ -123,7 +162,7 @@ const ReadingSettingsPanel = ({ onClose }) => {
             onChange={handleFontSizeChange}
             className="w-full"
           />
-          <div className="flex justify-between text-xs text-gray-500 mt-1">
+          <div className="flex justify-between text-xs themed-text-secondary mt-1">
             <span>Small</span>
             <span>Large</span>
           </div>
@@ -131,7 +170,7 @@ const ReadingSettingsPanel = ({ onClose }) => {
 
         {/* Font Family */}
         <div>
-          <h3 className="font-medium text-gray-700 mb-2">Font Family</h3>
+          <h3 className="font-medium themed-text-primary mb-2">Font Family</h3>
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={() => handleFontFamilyChange('system-ui')}
@@ -183,8 +222,8 @@ const ReadingSettingsPanel = ({ onClose }) => {
         {/* Line Spacing */}
         <div>
           <div className="flex justify-between mb-2">
-            <h3 className="font-medium text-gray-700">Line Spacing</h3>
-            <span className="text-gray-500">{localPreferences.lineSpacing}x</span>
+            <h3 className="font-medium themed-text-primary">Line Spacing</h3>
+            <span className="themed-text-secondary">{localPreferences.lineSpacing}x</span>
           </div>
           <input
             type="range"
@@ -195,7 +234,7 @@ const ReadingSettingsPanel = ({ onClose }) => {
             onChange={handleLineSpacingChange}
             className="w-full"
           />
-          <div className="flex justify-between text-xs text-gray-500 mt-1">
+          <div className="flex justify-between text-xs themed-text-secondary mt-1">
             <span>Tight</span>
             <span>Spacious</span>
           </div>
@@ -204,8 +243,8 @@ const ReadingSettingsPanel = ({ onClose }) => {
         {/* Letter Spacing */}
         <div>
           <div className="flex justify-between mb-2">
-            <h3 className="font-medium text-gray-700">Letter Spacing</h3>
-            <span className="text-gray-500">{localPreferences.letterSpacing}em</span>
+            <h3 className="font-medium themed-text-primary">Letter Spacing</h3>
+            <span className="themed-text-secondary">{localPreferences.letterSpacing}em</span>
           </div>
           <input
             type="range"
@@ -216,7 +255,7 @@ const ReadingSettingsPanel = ({ onClose }) => {
             onChange={handleLetterSpacingChange}
             className="w-full"
           />
-          <div className="flex justify-between text-xs text-gray-500 mt-1">
+          <div className="flex justify-between text-xs themed-text-secondary mt-1">
             <span>Normal</span>
             <span>Wide</span>
           </div>
@@ -231,14 +270,14 @@ const ReadingSettingsPanel = ({ onClose }) => {
             onChange={handleDyslexiaFriendlyChange}
             className="mr-2"
           />
-          <label htmlFor="dyslexiaFriendly" className="text-gray-700">
+          <label htmlFor="dyslexiaFriendly" className="themed-text-primary">
             Dyslexia Friendly Mode
           </label>
         </div>
 
         {/* Preview */}
         <div className="mt-6">
-          <h3 className="font-medium text-gray-700 mb-2">Preview</h3>
+          <h3 className="font-medium themed-text-primary mb-2">Preview</h3>
           <div
             className={`p-4 rounded-md border ${
               localPreferences.theme === 'dark'
@@ -248,8 +287,8 @@ const ReadingSettingsPanel = ({ onClose }) => {
                 : 'bg-white text-gray-800 border-gray-300'
             }`}
             style={{
-              fontFamily: localPreferences.fontFamily === 'dyslexic' 
-                ? 'OpenDyslexic, sans-serif' 
+              fontFamily: localPreferences.fontFamily === 'dyslexic'
+                ? 'OpenDyslexic, sans-serif'
                 : localPreferences.fontFamily,
               fontSize: `${localPreferences.fontSize}px`,
               lineHeight: localPreferences.lineSpacing,
@@ -263,8 +302,14 @@ const ReadingSettingsPanel = ({ onClose }) => {
           </div>
         </div>
 
-        {/* Save Button */}
-        <div className="flex justify-end mt-6">
+        {/* Buttons */}
+        <div className="flex justify-between mt-6">
+          <button
+            onClick={handleReset}
+            className="px-4 py-2 border themed-border rounded-md shadow-sm text-sm font-medium themed-text-primary themed-bg-secondary hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            Reset to Defaults
+          </button>
           <button
             onClick={handleSave}
             disabled={loading}

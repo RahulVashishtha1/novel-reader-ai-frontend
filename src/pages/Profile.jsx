@@ -1,24 +1,42 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { getUserProfile, updateUserProfile } from '../features/auth/authSlice';
+import { getUserProfile, updateUserProfile, getCurrentUser } from '../features/auth/authSlice';
 import UserSharedContent from '../components/UserSharedContent';
 
 const Profile = () => {
   const dispatch = useDispatch();
   const { user, loading, error } = useSelector((state) => state.auth);
-  
+
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [bio, setBio] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [updateSuccess, setUpdateSuccess] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
-  
+
+  // Use a ref to track if we've already fetched the profile
+  const profileFetched = useRef(false);
+
   useEffect(() => {
-    dispatch(getUserProfile());
-  }, [dispatch]);
-  
+    // Only fetch profile if we haven't already and we're not currently loading
+    if (!profileFetched.current && !loading && !user) {
+      console.log('🔍 Profile component mounted, dispatching getUserProfile');
+      profileFetched.current = true;
+
+      dispatch(getUserProfile())
+        .unwrap()
+        .then(response => {
+          console.log('✅ getUserProfile response:', response);
+        })
+        .catch(error => {
+          console.error('❌ getUserProfile error:', error);
+          // Reset the flag if there was an error, so we can try again
+          profileFetched.current = false;
+        });
+    }
+  }, [dispatch, loading, user]);
+
   useEffect(() => {
     if (user) {
       setName(user.name || '');
@@ -26,26 +44,26 @@ const Profile = () => {
       setBio(user.bio || '');
     }
   }, [user]);
-  
+
   // Reset success message after 3 seconds
   useEffect(() => {
     if (updateSuccess) {
       const timer = setTimeout(() => {
         setUpdateSuccess(false);
       }, 3000);
-      
+
       return () => clearTimeout(timer);
     }
   }, [updateSuccess]);
-  
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     const userData = {
       name,
       bio,
     };
-    
+
     dispatch(updateUserProfile(userData))
       .unwrap()
       .then(() => {
@@ -53,8 +71,24 @@ const Profile = () => {
         setUpdateSuccess(true);
       });
   };
-  
-  if (loading && !user) {
+
+  // Force getCurrentUser if we have a token but no user data
+  useEffect(() => {
+    if (localStorage.getItem('token') && !user && !loading) {
+      dispatch(getCurrentUser());
+    }
+  }, [dispatch, user, loading]);
+
+  // Add detailed logging to help debug
+  console.log('🔍 Profile render state:', {
+    loading,
+    user,
+    userStats: user?.stats,
+    readingStats: user?.readingStats
+  });
+
+  if (loading || !user) {
+    console.log('⏳ Profile is still loading or user data is missing');
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
@@ -64,7 +98,7 @@ const Profile = () => {
       </div>
     );
   }
-  
+
   return (
     <div className="min-h-screen bg-gray-100 py-8">
       <div className="max-w-4xl mx-auto px-4">
@@ -72,19 +106,19 @@ const Profile = () => {
           <h1 className="text-3xl font-bold">Your Profile</h1>
           <p className="text-gray-600">Manage your account and view your shared content</p>
         </div>
-        
+
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
             {error}
           </div>
         )}
-        
+
         {updateSuccess && (
           <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
             Profile updated successfully!
           </div>
         )}
-        
+
         <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
           <div className="border-b border-gray-200">
             <nav className="flex">
@@ -110,7 +144,7 @@ const Profile = () => {
               </button>
             </nav>
           </div>
-          
+
           <div className="p-6">
             {activeTab === 'profile' ? (
               <div>
@@ -126,28 +160,28 @@ const Profile = () => {
                           Edit Profile
                         </button>
                       </div>
-                      
+
                       <div className="space-y-4">
                         <div>
                           <h3 className="text-sm font-medium text-gray-500">Name</h3>
                           <p className="mt-1">{user?.name}</p>
                         </div>
-                        
+
                         <div>
                           <h3 className="text-sm font-medium text-gray-500">Email</h3>
                           <p className="mt-1">{user?.email}</p>
                         </div>
-                        
+
                         <div>
                           <h3 className="text-sm font-medium text-gray-500">Bio</h3>
                           <p className="mt-1">{user?.bio || 'No bio provided'}</p>
                         </div>
-                        
+
                         <div>
                           <h3 className="text-sm font-medium text-gray-500">Account Type</h3>
                           <p className="mt-1 capitalize">{user?.role || 'user'}</p>
                         </div>
-                        
+
                         <div>
                           <h3 className="text-sm font-medium text-gray-500">Member Since</h3>
                           <p className="mt-1">
@@ -162,7 +196,7 @@ const Profile = () => {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="border-t border-gray-200 pt-6">
                       <h2 className="text-xl font-bold mb-4">Reading Stats</h2>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -170,19 +204,19 @@ const Profile = () => {
                           <div className="text-sm text-gray-500">Novels</div>
                           <div className="text-2xl font-bold">{user?.stats?.totalNovels || 0}</div>
                         </div>
-                        
+
                         <div className="bg-gray-50 p-4 rounded-md">
                           <div className="text-sm text-gray-500">Reading Time</div>
                           <div className="text-2xl font-bold">
-                            {user?.stats?.totalReadingTime
-                              ? `${Math.floor(user.stats.totalReadingTime / 60)}h ${user.stats.totalReadingTime % 60}m`
+                            {(user?.stats?.totalReadingTime || user?.readingStats?.totalReadingTime)
+                              ? `${Math.floor((user?.stats?.totalReadingTime || user?.readingStats?.totalReadingTime) / 60)}h ${(user?.stats?.totalReadingTime || user?.readingStats?.totalReadingTime) % 60}m`
                               : '0h 0m'}
                           </div>
                         </div>
-                        
+
                         <div className="bg-gray-50 p-4 rounded-md">
                           <div className="text-sm text-gray-500">Images Generated</div>
-                          <div className="text-2xl font-bold">{user?.stats?.totalImagesGenerated || 0}</div>
+                          <div className="text-2xl font-bold">{user?.stats?.totalImagesGenerated || user?.readingStats?.imagesGenerated || 0}</div>
                         </div>
                       </div>
                     </div>
@@ -203,7 +237,7 @@ const Profile = () => {
                           required
                         />
                       </div>
-                      
+
                       <div>
                         <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                           Email
@@ -217,7 +251,7 @@ const Profile = () => {
                         />
                         <p className="mt-1 text-sm text-gray-500">Email cannot be changed</p>
                       </div>
-                      
+
                       <div>
                         <label htmlFor="bio" className="block text-sm font-medium text-gray-700">
                           Bio
@@ -231,7 +265,7 @@ const Profile = () => {
                         ></textarea>
                       </div>
                     </div>
-                    
+
                     <div className="mt-6 flex justify-end space-x-3">
                       <button
                         type="button"
@@ -260,7 +294,7 @@ const Profile = () => {
             )}
           </div>
         </div>
-        
+
         <div className="text-center">
           <Link to="/bookshelf" className="text-blue-600 hover:underline">
             Back to Bookshelf

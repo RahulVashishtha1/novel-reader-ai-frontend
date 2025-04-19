@@ -65,9 +65,9 @@ const Statistics = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen themed-bg-secondary py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Reading Statistics</h1>
+        <h1 className="text-3xl font-bold themed-text-primary mb-8">Reading Statistics</h1>
 
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
@@ -83,52 +83,52 @@ const Statistics = () => {
           <div className="space-y-8">
             {/* Stats cards */}
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              <div className="bg-white overflow-hidden shadow rounded-lg">
+              <div className="themed-bg-primary overflow-hidden shadow rounded-lg">
                 <div className="px-4 py-5 sm:p-6">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
+                    <dt className="text-sm font-medium themed-text-secondary truncate">
                       Total Reading Time
                     </dt>
-                    <dd className="mt-1 text-3xl font-semibold text-gray-900">
+                    <dd className="mt-1 text-3xl font-semibold themed-text-primary">
                       {formatReadingTime(stats?.totalReadingTime || 0)}
                     </dd>
                   </dl>
                 </div>
               </div>
 
-              <div className="bg-white overflow-hidden shadow rounded-lg">
+              <div className="themed-bg-primary overflow-hidden shadow rounded-lg">
                 <div className="px-4 py-5 sm:p-6">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
+                    <dt className="text-sm font-medium themed-text-secondary truncate">
                       Pages Read
                     </dt>
-                    <dd className="mt-1 text-3xl font-semibold text-gray-900">
+                    <dd className="mt-1 text-3xl font-semibold themed-text-primary">
                       {stats?.pagesRead || 0}
                     </dd>
                   </dl>
                 </div>
               </div>
 
-              <div className="bg-white overflow-hidden shadow rounded-lg">
+              <div className="themed-bg-primary overflow-hidden shadow rounded-lg">
                 <div className="px-4 py-5 sm:p-6">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
+                    <dt className="text-sm font-medium themed-text-secondary truncate">
                       Novels Completed
                     </dt>
-                    <dd className="mt-1 text-3xl font-semibold text-gray-900">
+                    <dd className="mt-1 text-3xl font-semibold themed-text-primary">
                       {stats?.novelsCompleted || 0}
                     </dd>
                   </dl>
                 </div>
               </div>
 
-              <div className="bg-white overflow-hidden shadow rounded-lg">
+              <div className="themed-bg-primary overflow-hidden shadow rounded-lg">
                 <div className="px-4 py-5 sm:p-6">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
+                    <dt className="text-sm font-medium themed-text-secondary truncate">
                       Images Generated
                     </dt>
-                    <dd className="mt-1 text-3xl font-semibold text-gray-900">
+                    <dd className="mt-1 text-3xl font-semibold themed-text-primary">
                       {stats?.imagesGenerated || 0}
                     </dd>
                   </dl>
@@ -138,8 +138,8 @@ const Statistics = () => {
 
             {/* Charts */}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-              <div className="bg-white p-6 rounded-lg shadow">
-                <h2 className="text-xl font-semibold mb-4">Reading Progress</h2>
+              <div className="themed-bg-primary p-6 rounded-lg shadow">
+                <h2 className="text-xl font-semibold mb-4 themed-text-primary">Reading Progress</h2>
                 {novelsWithProgress.length > 0 ? (
                   <Bar
                     data={progressChartData}
@@ -176,8 +176,8 @@ const Statistics = () => {
                 )}
               </div>
 
-              <div className="bg-white p-6 rounded-lg shadow">
-                <h2 className="text-xl font-semibold mb-4">Novel Completion</h2>
+              <div className="themed-bg-primary p-6 rounded-lg shadow">
+                <h2 className="text-xl font-semibold mb-4 themed-text-primary">Novel Completion</h2>
                 {novelsWithProgress.length > 0 ? (
                   <div className="h-64 flex items-center justify-center">
                     <Pie
@@ -202,36 +202,36 @@ const Statistics = () => {
             </div>
 
             {/* Novel progress table */}
-            <div className="bg-white shadow rounded-lg overflow-hidden">
+            <div className="themed-bg-primary shadow rounded-lg overflow-hidden">
               <div className="px-4 py-5 sm:px-6">
-                <h2 className="text-xl font-semibold">Your Novels</h2>
+                <h2 className="text-xl font-semibold themed-text-primary">Your Novels</h2>
               </div>
               <div className="border-t border-gray-200">
                 {novelsWithProgress.length > 0 ? (
                   <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                    <thead className="themed-bg-secondary">
                       <tr>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                          className="px-6 py-3 text-left text-xs font-medium themed-text-secondary uppercase tracking-wider"
                         >
                           Title
                         </th>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                          className="px-6 py-3 text-left text-xs font-medium themed-text-secondary uppercase tracking-wider"
                         >
                           Progress
                         </th>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                          className="px-6 py-3 text-left text-xs font-medium themed-text-secondary uppercase tracking-wider"
                         >
                           Pages
                         </th>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                          className="px-6 py-3 text-left text-xs font-medium themed-text-secondary uppercase tracking-wider"
                         >
                           Status
                         </th>
@@ -240,11 +240,11 @@ const Statistics = () => {
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="themed-bg-primary divide-y divide-gray-200">
                       {novelsWithProgress.map((novel) => (
                         <tr key={novel.id}>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-medium text-gray-900">
+                            <div className="text-sm font-medium themed-text-primary">
                               {novel.title}
                             </div>
                           </td>
@@ -255,12 +255,12 @@ const Statistics = () => {
                                 style={{ width: `${novel.progress}%` }}
                               ></div>
                             </div>
-                            <div className="text-xs text-gray-500 mt-1">
+                            <div className="text-xs themed-text-secondary mt-1">
                               {novel.progress}%
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">
+                            <div className="text-sm themed-text-primary">
                               {novel.lastReadPage} / {novel.totalPages}
                             </div>
                           </td>
@@ -288,7 +288,7 @@ const Statistics = () => {
                     </tbody>
                   </table>
                 ) : (
-                  <div className="text-center py-8 text-gray-500">
+                  <div className="text-center py-8 themed-text-secondary">
                     <p className="mb-4">You haven't added any novels yet.</p>
                     <Link
                       to="/bookshelf"

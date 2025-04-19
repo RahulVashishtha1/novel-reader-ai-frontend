@@ -154,6 +154,7 @@ const initialState = {
     content: '',
     pageNumber: 1,
     totalPages: 0,
+    metadata: null,
   },
   loading: false,
   error: null,
@@ -173,6 +174,7 @@ const novelSlice = createSlice({
         content: '',
         pageNumber: 1,
         totalPages: 0,
+        metadata: null,
       };
     },
   },
@@ -228,6 +230,7 @@ const novelSlice = createSlice({
           content: action.payload.content,
           pageNumber: action.payload.page,
           totalPages: action.payload.totalPages,
+          metadata: action.payload.metadata || null,
         };
       })
       .addCase(getNovelPage.rejected, (state, action) => {

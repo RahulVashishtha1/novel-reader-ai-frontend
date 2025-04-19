@@ -8,10 +8,10 @@ import {
   clearCurrentAnnotation,
 } from '../features/annotations/annotationsSlice';
 
-const TextHighlighter = ({ content, novelId, page }) => {
+const TextHighlighter = ({ content, novelId, page, isHtml = false }) => {
   const dispatch = useDispatch();
   const { pageAnnotations, currentAnnotation } = useSelector((state) => state.annotations);
-  
+
   const [selectedText, setSelectedText] = useState('');
   const [selectionRange, setSelectionRange] = useState(null);
   const [showToolbar, setShowToolbar] = useState(false);
@@ -20,11 +20,11 @@ const TextHighlighter = ({ content, novelId, page }) => {
   const [noteText, setNoteText] = useState('');
   const [selectedColor, setSelectedColor] = useState('#ffff00'); // Default yellow
   const [selectedCategory, setSelectedCategory] = useState('highlight');
-  
+
   const contentRef = useRef(null);
   const toolbarRef = useRef(null);
   const noteInputRef = useRef(null);
-  
+
   // Available highlight colors
   const highlightColors = [
     { color: '#ffff00', name: 'Yellow' },
@@ -33,7 +33,7 @@ const TextHighlighter = ({ content, novelId, page }) => {
     { color: '#ffb6c1', name: 'Pink' },
     { color: '#ffa500', name: 'Orange' },
   ];
-  
+
   // Available categories
   const categories = [
     { value: 'highlight', label: 'Highlight' },
@@ -42,43 +42,43 @@ const TextHighlighter = ({ content, novelId, page }) => {
     { value: 'important', label: 'Important' },
     { value: 'vocabulary', label: 'Vocabulary' },
   ];
-  
+
   // Handle text selection
   const handleTextSelection = () => {
     const selection = window.getSelection();
-    
+
     if (selection.toString().trim().length > 0 && contentRef.current) {
       // Get the selected text
       const text = selection.toString();
       setSelectedText(text);
-      
+
       // Get the range
       const range = selection.getRangeAt(0);
-      
+
       // Calculate offsets relative to the content element
       const contentElement = contentRef.current;
       const contentText = contentElement.textContent;
-      
+
       // Create a range from the start of the content to the start of the selection
       const startRange = document.createRange();
       startRange.setStart(contentElement, 0);
       startRange.setEnd(range.startContainer, range.startOffset);
-      
+
       // The length of this range's text is the start offset
       const startOffset = startRange.toString().length;
-      
+
       // The end offset is the start offset plus the length of the selected text
       const endOffset = startOffset + text.length;
-      
+
       setSelectionRange({ startOffset, endOffset });
-      
+
       // Position the toolbar above the selection
       const rect = range.getBoundingClientRect();
       setToolbarPosition({
         top: rect.top - 50, // Position above the selection
         left: rect.left + (rect.width / 2) - 100, // Center horizontally
       });
-      
+
       setShowToolbar(true);
     } else {
       // If clicking outside a selection, hide the toolbar
@@ -88,7 +88,7 @@ const TextHighlighter = ({ content, novelId, page }) => {
       }
     }
   };
-  
+
   // Handle highlighting text
   const handleHighlight = () => {
     if (selectionRange && novelId && page) {
@@ -102,9 +102,9 @@ const TextHighlighter = ({ content, novelId, page }) => {
         color: selectedColor,
         category: selectedCategory,
       };
-      
+
       dispatch(createAnnotation({ novelId, annotationData }));
-      
+
       // Clear selection and hide toolbar
       window.getSelection().removeAllRanges();
       setShowToolbar(false);
@@ -112,12 +112,12 @@ const TextHighlighter = ({ content, novelId, page }) => {
       setSelectionRange(null);
     }
   };
-  
+
   // Handle adding a note
   const handleAddNote = () => {
     setShowNoteInput(true);
   };
-  
+
   // Handle saving a note
   const handleSaveNote = () => {
     if (selectionRange && novelId && page && noteText.trim()) {
@@ -132,9 +132,9 @@ const TextHighlighter = ({ content, novelId, page }) => {
         note: noteText,
         category: 'note',
       };
-      
+
       dispatch(createAnnotation({ novelId, annotationData }));
-      
+
       // Clear selection and hide toolbar
       window.getSelection().removeAllRanges();
       setShowToolbar(false);
@@ -144,24 +144,24 @@ const TextHighlighter = ({ content, novelId, page }) => {
       setSelectionRange(null);
     }
   };
-  
+
   // Handle updating a note
   const handleUpdateNote = () => {
     if (currentAnnotation) {
       const annotationData = {
         note: noteText,
       };
-      
+
       dispatch(updateAnnotation({
         annotationId: currentAnnotation._id,
         annotationData,
       }));
-      
+
       setShowNoteInput(false);
       dispatch(clearCurrentAnnotation());
     }
   };
-  
+
   // Handle deleting an annotation
   const handleDeleteAnnotation = () => {
     if (currentAnnotation) {
@@ -171,32 +171,32 @@ const TextHighlighter = ({ content, novelId, page }) => {
       dispatch(clearCurrentAnnotation());
     }
   };
-  
+
   // Handle clicking on an existing annotation
   const handleAnnotationClick = (annotation, event) => {
     event.stopPropagation();
     dispatch(setCurrentAnnotation(annotation));
-    
+
     // Position the toolbar near the annotation
     const rect = event.target.getBoundingClientRect();
     setToolbarPosition({
       top: rect.top - 50,
       left: rect.left + (rect.width / 2) - 100,
     });
-    
+
     setShowToolbar(true);
-    
+
     if (annotation.note) {
       setNoteText(annotation.note);
       setShowNoteInput(true);
     }
   };
-  
+
   // Close toolbar when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
-        toolbarRef.current && 
+        toolbarRef.current &&
         !toolbarRef.current.contains(event.target) &&
         (!noteInputRef.current || !noteInputRef.current.contains(event.target))
       ) {
@@ -205,87 +205,100 @@ const TextHighlighter = ({ content, novelId, page }) => {
         dispatch(clearCurrentAnnotation());
       }
     };
-    
+
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [dispatch]);
-  
+
   // Render the content with annotations
   const renderContentWithAnnotations = () => {
-    if (!content || !pageAnnotations || pageAnnotations.length === 0) {
+    if (!content) {
+      return '';
+    }
+
+    // If there are no annotations or if it's HTML content, just return the content
+    if (!pageAnnotations || pageAnnotations.length === 0) {
       return content;
     }
-    
+
+    // For HTML content, we need a different approach to annotations
+    // This is a simplified implementation - in a production app, you'd want to use a proper HTML parser
+    if (isHtml) {
+      // For now, just return the HTML content without annotations
+      // In a real implementation, you'd need to parse the HTML and insert annotations at the right places
+      return content;
+    }
+
     // Sort annotations by start offset (in reverse order to process from end to start)
-    const sortedAnnotations = [...pageAnnotations].sort((a, b) => 
+    const sortedAnnotations = [...pageAnnotations].sort((a, b) =>
       b.textSelection.startOffset - a.textSelection.startOffset
     );
-    
+
     let contentWithAnnotations = content;
-    
+
     // Insert annotation markers
     sortedAnnotations.forEach((annotation) => {
       const { startOffset, endOffset } = annotation.textSelection;
       const beforeText = contentWithAnnotations.substring(0, startOffset);
       const highlightedText = contentWithAnnotations.substring(startOffset, endOffset);
       const afterText = contentWithAnnotations.substring(endOffset);
-      
+
       const hasNote = annotation.note && annotation.note.trim().length > 0;
       const noteIndicator = hasNote ? ' 📝' : '';
-      
-      contentWithAnnotations = 
-        beforeText + 
-        `<span 
-          class="annotation" 
-          data-annotation-id="${annotation._id}" 
+
+      contentWithAnnotations =
+        beforeText +
+        `<span
+          class="annotation"
+          data-annotation-id="${annotation._id}"
           style="background-color: ${annotation.color}; cursor: pointer;"
-        >` + 
-        highlightedText + 
+        >` +
+        highlightedText +
         noteIndicator +
-        '</span>' + 
+        '</span>' +
         afterText;
     });
-    
+
     return contentWithAnnotations;
   };
-  
+
   // Add event listeners to annotation spans after rendering
   useEffect(() => {
     const addAnnotationEventListeners = () => {
       if (contentRef.current) {
         const annotationSpans = contentRef.current.querySelectorAll('.annotation');
-        
+
         annotationSpans.forEach((span) => {
           const annotationId = span.getAttribute('data-annotation-id');
           const annotation = pageAnnotations.find(a => a._id === annotationId);
-          
+
           if (annotation) {
-            span.addEventListener('click', (event) => 
+            span.addEventListener('click', (event) =>
               handleAnnotationClick(annotation, event)
             );
           }
         });
       }
     };
-    
+
     // Add a small delay to ensure the DOM has been updated
     const timeoutId = setTimeout(addAnnotationEventListeners, 100);
-    
+
     return () => clearTimeout(timeoutId);
   }, [pageAnnotations, content]);
-  
+
   return (
     <div className="relative">
       {/* Content with annotations */}
-      <div 
+      <div
         ref={contentRef}
         className="prose max-w-none"
         onMouseUp={handleTextSelection}
         dangerouslySetInnerHTML={{ __html: renderContentWithAnnotations() }}
       />
-      
+
       {/* Annotation toolbar */}
       {showToolbar && (
         <div
@@ -308,7 +321,7 @@ const TextHighlighter = ({ content, novelId, page }) => {
               />
             ))}
           </div>
-          
+
           {/* Action buttons */}
           <div className="flex space-x-2">
             {!currentAnnotation ? (
@@ -354,7 +367,7 @@ const TextHighlighter = ({ content, novelId, page }) => {
           </div>
         </div>
       )}
-      
+
       {/* Note input */}
       {showNoteInput && (
         <div

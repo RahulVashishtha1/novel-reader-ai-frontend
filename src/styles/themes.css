@@ -74,6 +74,41 @@ body {
   background-color: var(--accent-color);
 }
 
+/* Body and App Container Theme Classes */
+body.light-theme,
+.app-container[data-theme="light"],
+.app-container[data-theme="light"] main {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+body.dark-theme,
+.app-container[data-theme="dark"],
+.app-container[data-theme="dark"] main {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+body.sepia-theme,
+.app-container[data-theme="sepia"],
+.app-container[data-theme="sepia"] main {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+/* Navbar Theme */
+.themed-navbar {
+  transition: background-color 0.3s ease;
+}
+
+[data-theme="dark"] .themed-navbar {
+  background-color: #0f172a;
+}
+
+[data-theme="sepia"] .themed-navbar {
+  background-color: #8a7966;
+}
+
 /* OpenDyslexic Font */
 @font-face {
   font-family: 'OpenDyslexic';

@@ -13,10 +13,10 @@ const NovelCard = ({ novel }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden">
+    <div className="themed-bg-primary rounded-lg shadow-md overflow-hidden">
       <div className="p-4">
-        <h3 className="text-xl font-semibold mb-2 truncate">{novel.title}</h3>
-        <div className="text-sm text-gray-500 mb-2">
+        <h3 className="text-xl font-semibold mb-2 truncate themed-text-primary">{novel.title}</h3>
+        <div className="text-sm themed-text-secondary mb-2">
           Uploaded: {formatDate(novel.createdAt)}
         </div>
         <div className="mb-3">

@@ -38,7 +38,7 @@ function App() {
     <Router>
       <ToolsProvider>
         <ThemeProvider>
-          <div className="min-h-screen flex flex-col themed-bg-secondary">
+          <div className="min-h-screen flex flex-col themed-bg-secondary app-container">
             <Navbar />
             <main className="flex-grow">
             <Routes>

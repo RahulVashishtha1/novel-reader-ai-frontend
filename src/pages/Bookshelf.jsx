@@ -14,10 +14,10 @@ const Bookshelf = () => {
   }, [dispatch]);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen themed-bg-secondary py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">My Bookshelf</h1>
+          <h1 className="text-3xl font-bold themed-text-primary">My Bookshelf</h1>
           <button
             onClick={() => setShowUploadForm(true)}
             className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition"
@@ -37,9 +37,9 @@ const Bookshelf = () => {
             <div className="text-gray-500">Loading novels...</div>
           </div>
         ) : novels.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-md p-8 text-center">
-            <h2 className="text-xl font-semibold text-gray-700 mb-2">Your bookshelf is empty</h2>
-            <p className="text-gray-500 mb-6">
+          <div className="themed-bg-primary rounded-lg shadow-md p-8 text-center">
+            <h2 className="text-xl font-semibold themed-text-primary mb-2">Your bookshelf is empty</h2>
+            <p className="themed-text-secondary mb-6">
               Upload your first novel to get started with VisNovel.
             </p>
             <button

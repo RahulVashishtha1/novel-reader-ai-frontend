@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useTools } from '../context/ToolsContext';
 import ReadingSettingsPanel from '../components/ReadingSettingsPanel';
 import LayoutSettingsPanel from '../components/LayoutSettingsPanel';
+import BookThemeProvider from '../components/BookThemeProvider';
 import TextHighlighter from '../components/TextHighlighter';
 import AnnotationsList from '../components/AnnotationsList';
 import SharePassageModal from '../components/SharePassageModal';
@@ -45,6 +46,7 @@ const Reader = () => {
   const [showSharePassage, setShowSharePassage] = useState(false);
   const [showShareProgress, setShowShareProgress] = useState(false);
   const [selectedPassage, setSelectedPassage] = useState('');
+  const [jumpToPage, setJumpToPage] = useState('');
 
   const readingTimeRef = useRef(null);
   const autoPageRef = useRef(null);
@@ -299,7 +301,8 @@ const Reader = () => {
         const response = await dispatch(getNovelPage({ id, page })).unwrap();
         contentArray.push({
           page,
-          content: response.content
+          content: response.content,
+          metadata: response.metadata || null
         });
       } catch (error) {
         console.error(`Error loading page ${page}:`, error);
@@ -333,18 +336,20 @@ const Reader = () => {
   };
 
   return (
-    <div className={`min-h-screen themed-bg-secondary flex flex-col ${preferences?.fullWidth ? 'max-w-none' : 'max-w-7xl mx-auto'}`}>
+    <div className="min-h-screen themed-bg-secondary flex flex-col w-full max-w-none">
 
       {/* Main content */}
-      <div className="flex-grow flex flex-col md:flex-row h-[calc(100vh-64px)]" style={{ height: 'calc(100vh - 64px)' }}>
+      <div className="flex-grow flex flex-col md:flex-row overflow-hidden" style={{ height: 'calc(100vh - 120px)' }}>
         {/* Tools panel (conditionally shown) */}
         {showTools && (
           <div className={`
-            w-full md:w-64 themed-bg-primary shadow-md p-4 z-10 themed-text-primary
+             min-w-fit flex-shrink-0 themed-bg-primary shadow-md p-4 z-10 themed-text-primary overflow-y-auto
             ${preferences?.toolbarPosition === 'hidden' ? 'hidden' : ''}
-            ${preferences?.toolbarPosition === 'top' ? 'w-full h-auto' : 'absolute md:relative'}
-            ${preferences?.toolbarPosition === 'left' ? 'order-first left-0' : 'right-0'}
-            ${preferences?.toolbarPosition !== 'top' ? 'top-16' : 'top-0'}
+            ${preferences?.toolbarPosition === 'top' ? 'w-full h-auto mb-4' : 'absolute md:relative'}
+            ${preferences?.toolbarPosition === 'left' ? 'order-first left-0 md:mr-2' : 'right-0 md:ml-2'}
+            ${preferences?.toolbarPosition !== 'top' ? 'bottom-16' : 'top-0'}
+            ${preferences?.toolbarPosition !== 'top' ? 'max-h-[calc(100vh-64px)]' : ''}
+            ${preferences?.layout === 'compact' ? 'md:p-2' : preferences?.layout === 'expanded' ? 'md:p-6' : 'md:p-4'}
           `}>
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-semibold text-gray-700">Tools</h3>
@@ -356,7 +361,7 @@ const Reader = () => {
               </button>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-8">
               <div>
                 <h4 className="font-medium text-gray-700 mb-2">Bookmarks</h4>
                 <button
@@ -364,18 +369,18 @@ const Reader = () => {
                     setShowBookmarks(!showBookmarks);
                     setShowNotes(false);
                   }}
-                  className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 transition text-left"
+                  className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 transition flex items-center"
                 >
-                  View Bookmarks
+                  <span className="mr-2">🔖</span> View Bookmarks
                 </button>
                 <button
                   onClick={() => {
                     setShowAddBookmark(!showAddBookmark);
                     setShowAddNote(false);
                   }}
-                  className="w-full mt-2 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition text-left"
+                  className="w-full mt-2 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition flex items-center"
                 >
-                  Add Bookmark
+                  <span className="mr-2">+</span> Add Bookmark
                 </button>
               </div>
 
@@ -386,18 +391,18 @@ const Reader = () => {
                     setShowNotes(!showNotes);
                     setShowBookmarks(false);
                   }}
-                  className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 transition text-left"
+                  className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 transition flex items-center"
                 >
-                  View Notes
+                  <span className="mr-2">📝</span> View Notes
                 </button>
                 <button
                   onClick={() => {
                     setShowAddNote(!showAddNote);
                     setShowAddBookmark(false);
                   }}
-                  className="w-full mt-2 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition text-left"
+                  className="w-full mt-2 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition flex items-center"
                 >
-                  Add Note
+                  <span className="mr-2">+</span> Add Note
                 </button>
               </div>
 
@@ -439,9 +444,9 @@ const Reader = () => {
                     setShowBookmarks(false);
                     setShowNotes(false);
                   }}
-                  className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 transition text-left"
+                  className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 transition flex items-center"
                 >
-                  View Annotations
+                  <span className="mr-2">🔍</span> View Annotations
                 </button>
               </div>
 
@@ -449,15 +454,15 @@ const Reader = () => {
                 <h4 className="font-medium text-gray-700 mb-2">Share</h4>
                 <button
                   onClick={handleSharePassage}
-                  className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 transition text-left mb-2"
+                  className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 transition flex items-center mb-2"
                 >
-                  Share Passage
+                  <span className="mr-2">🔗</span> Share Passage
                 </button>
                 <button
                   onClick={handleShareProgress}
-                  className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 transition text-left"
+                  className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 transition flex items-center"
                 >
-                  Share Progress
+                  <span className="mr-2">📈</span> Share Progress
                 </button>
               </div>
 
@@ -465,15 +470,15 @@ const Reader = () => {
                 <h4 className="font-medium text-gray-700 mb-2">Display Settings</h4>
                 <button
                   onClick={() => setShowSettings(true)}
-                  className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 transition text-left mb-2"
+                  className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 transition flex items-center mb-2"
                 >
-                  Customize Appearance
+                  <span className="mr-2">⚙️</span> Customize Appearance
                 </button>
                 <button
                   onClick={() => setShowLayoutSettings(true)}
-                  className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 transition text-left"
+                  className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 transition flex items-center"
                 >
-                  Customize Layout
+                  <span className="mr-2">🖰</span> Customize Layout
                 </button>
               </div>
             </div>
@@ -536,24 +541,25 @@ const Reader = () => {
 
         {/* Customizable layout for reading */}
         <div className={`
-          flex-grow flex flex-col ${preferences?.layout !== 'compact' ? 'p-4' : 'p-2'} overflow-hidden
+          flex-grow flex flex-col ${preferences?.layout !== 'compact' ? 'px-6 py-4' : 'p-2'} overflow-hidden min-h-0 min-w-0  mx-auto w-full
           ${preferences?.imagePosition === 'bottom' ? 'md:flex-col' : 'md:flex-row'}
-          ${preferences?.layout === 'expanded' ? 'space-x-6 space-y-6' : ''}
+          ${preferences?.layout === 'expanded' ? 'space-x-3 space-y-3' : ''}
         `}>
           {/* Text reader column - position based on preferences */}
           <div className={`
-            flex-1 flex flex-col h-full
-            ${preferences?.imagePosition === 'left' ? 'md:order-last md:ml-4' : 'md:mr-4'}
+            flex-1 flex flex-col h-full min-h-0 w-full
+            ${preferences?.imagePosition === 'left' ? 'md:order-last md:ml-2' : 'md:mr-2'}
             ${preferences?.imagePosition === 'bottom' ? 'mb-4' : 'md:mb-0'}
             ${preferences?.layout === 'compact' ? 'mr-0 mb-2' : 'mb-4'}
           `}>
+            <h1 className="text-2xl font-bold text-gray-900 mb-4 truncate themed-text-primary">
+              {currentNovel?.title || 'Loading...'}
+            </h1>
+              <BookThemeProvider>
             <div id="novel-content" className={`
-              themed-bg-primary shadow-md rounded-lg flex-grow overflow-auto themed-text-primary
-              ${preferences?.layout === 'compact' ? 'p-3' : preferences?.layout === 'expanded' ? 'p-8' : 'p-6'}
-            `} style={{ maxHeight: 'calc(100vh - 250px)' }}>
-              <h1 className="text-2xl font-bold text-gray-900 mb-4 truncate">
-                {currentNovel?.title || 'Loading...'}
-              </h1>
+              shadow-md rounded-lg flex-grow overflow-auto w-full
+              ${preferences?.layout === 'compact' ? 'p-3' : preferences?.layout === 'expanded' ? 'p-6' : 'p-5'}
+            `} style={{ height: 'calc(100vh - 180px)', maxHeight: 'calc(100vh - 180px)' }}>
 
               {error && (
                 <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -576,6 +582,7 @@ const Reader = () => {
                         content={item.content}
                         novelId={id}
                         page={item.page}
+                        isHtml={item.metadata?.isHtml}
                       />
                     </div>
                   ))}
@@ -591,6 +598,7 @@ const Reader = () => {
                         content={item.content}
                         novelId={id}
                         page={item.page}
+                        isHtml={item.metadata?.isHtml}
                       />
                     </div>
                   ))}
@@ -602,6 +610,7 @@ const Reader = () => {
                       content={pageData.content}
                       novelId={id}
                       page={currentPage}
+                      isHtml={pageData.metadata?.isHtml}
                     />
                   </div>
                   <div className="flex justify-between items-center mt-4 pt-2 border-t border-gray-200">
@@ -629,168 +638,13 @@ const Reader = () => {
                   content={pageData.content}
                   novelId={id}
                   page={currentPage}
+                  isHtml={pageData.metadata?.isHtml}
                 />
               )}
             </div>
+              </BookThemeProvider>
 
-            {/* Navigation controls at the bottom (hidden in paginated mode) */}
-            {readingMode !== 'paginated' && (
-              <div className="themed-bg-primary shadow-md rounded-lg p-4 mt-4 themed-text-primary">
-              <div className="flex flex-col space-y-4">
-                {/* Page navigation */}
-                <div className="flex items-center justify-between">
-                  <button
-                    onClick={() => {
-                      if (readingMode === 'continuous' && continuousContent.length > 0) {
-                        // In continuous mode, move back by the number of pages displayed
-                        const firstPage = continuousContent[0]?.page || currentPage;
-                        const pagesToMove = Math.max(3, continuousContent.length);
-                        handlePageChange(Math.max(1, firstPage - pagesToMove));
-                      } else {
-                        // In single mode, just move back one page
-                        handlePageChange(currentPage - 1);
-                      }
-                    }}
-                    disabled={currentPage <= 1 || loading}
-                    className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:bg-blue-300 transition"
-                  >
-                    Previous
-                  </button>
 
-                  <div className="flex-1 mx-4">
-                    <div className="w-full bg-gray-200 rounded-full h-2.5">
-                      <div
-                        className="bg-blue-600 h-2.5 rounded-full"
-                        style={{
-                          width: `${Math.min(100, Math.max(0, (Math.min(currentPage, currentNovel?.totalPages || 1) / (currentNovel?.totalPages || 1)) * 100))}%`
-                        }}
-                      ></div>
-                    </div>
-                    <div className="text-center mt-1 text-sm text-gray-600">
-                      {readingMode === 'continuous' && continuousContent.length > 0 ? (
-                        <span>Pages {continuousContent[0]?.page} - {continuousContent[continuousContent.length-1]?.page} of {currentNovel?.totalPages || '?'}</span>
-                      ) : (
-                        <span>Page {Math.min(currentPage, currentNovel?.totalPages || 1)} of {currentNovel?.totalPages || '?'}</span>
-                      )}
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => {
-                      if (readingMode === 'continuous' && continuousContent.length > 0) {
-                        // In continuous mode, move forward by the number of pages displayed
-                        const lastPage = continuousContent[continuousContent.length - 1]?.page || currentPage;
-                        handlePageChange(Math.min(currentNovel?.totalPages || 1, lastPage + 1));
-                      } else {
-                        // In single mode, just move forward one page
-                        handlePageChange(currentPage + 1);
-                      }
-                    }}
-                    disabled={currentPage >= (currentNovel?.totalPages || 1) || loading}
-                    className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:bg-blue-300 transition"
-                  >
-                    Next
-                  </button>
-                </div>
-
-                {/* Jump to page and auto-page controls */}
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex items-center">
-                    <span className="mr-2">Jump to:</span>
-                    <input
-                      type="number"
-                      min="1"
-                      max={currentNovel?.totalPages || 1}
-                      value={currentPage}
-                      onChange={(e) => setCurrentPage(parseInt(e.target.value) || 1)}
-                      className="w-16 px-2 py-1 border border-gray-300 rounded-md mr-2"
-                    />
-                    <button
-                      onClick={() => handlePageChange(currentPage)}
-                      disabled={loading}
-                      className="bg-gray-200 text-gray-700 py-1 px-3 rounded-md hover:bg-gray-300 transition"
-                    >
-                      Go
-                    </button>
-                  </div>
-
-                  <div className="flex flex-wrap items-center space-x-4">
-                    <div className="flex items-center space-x-4">
-                      <label className="flex items-center">
-                        <input
-                          type="checkbox"
-                          checked={scrollToPage}
-                          onChange={toggleScrollToPage}
-                          className="mr-2"
-                        />
-                        Scroll to Page
-                      </label>
-
-                      <label className="flex items-center">
-                        <input
-                          type="checkbox"
-                          checked={autoPage}
-                          onChange={toggleAutoPage}
-                          className="mr-2"
-                        />
-                        Auto Page
-                      </label>
-
-                      {autoPage && (
-                        <select
-                          value={autoPageInterval}
-                          onChange={handleAutoPageIntervalChange}
-                          className="border border-gray-300 rounded-md px-2 py-1"
-                        >
-                          <option value="5">5 sec</option>
-                          <option value="10">10 sec</option>
-                          <option value="15">15 sec</option>
-                          <option value="30">30 sec</option>
-                          <option value="60">60 sec</option>
-                        </select>
-                      )}
-                    </div>
-
-                    <div className="flex items-center space-x-2 mt-2 sm:mt-0">
-                      <span className="mr-2">Mode:</span>
-                      <div className="flex space-x-1 overflow-x-auto">
-                        <button
-                          onClick={() => setReaderMode('single')}
-                          className={`px-3 py-1 text-sm rounded-md transition whitespace-nowrap ${readingMode === 'single' ? 'bg-blue-600 text-white font-bold' : 'bg-gray-200 text-gray-700'}`}
-                        >
-                          Single
-                        </button>
-                        <button
-                          onClick={() => setReaderMode('continuous')}
-                          className={`px-3 py-1 text-sm rounded-md transition whitespace-nowrap ${readingMode === 'continuous' ? 'bg-blue-600 text-white font-bold' : 'bg-gray-200 text-gray-700'}`}
-                        >
-                          Continuous
-                        </button>
-                        <button
-                          onClick={() => setReaderMode('scroll')}
-                          className={`px-3 py-1 text-sm rounded-md transition whitespace-nowrap ${readingMode === 'scroll' ? 'bg-blue-600 text-white font-bold' : 'bg-gray-200 text-gray-700'}`}
-                        >
-                          Scroll
-                        </button>
-                        <button
-                          onClick={() => setReaderMode('paginated')}
-                          className={`px-3 py-1 text-sm rounded-md transition whitespace-nowrap ${readingMode === 'paginated' ? 'bg-blue-600 text-white font-bold' : 'bg-gray-200 text-gray-700'}`}
-                        >
-                          Paginated
-                        </button>
-                      </div>
-                      <button
-                        onClick={() => setShowSettings(true)}
-                        className="px-3 py-1 text-sm rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 transition ml-2"
-                      >
-                        <span role="img" aria-label="Settings">⚙️</span> Theme
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            )}
           </div>
 
           {/* Image display column - position and size based on preferences */}
@@ -798,9 +652,9 @@ const Reader = () => {
             <div className={`
               themed-bg-primary shadow-md rounded-lg p-4 flex flex-col themed-text-primary
               ${preferences?.imagePosition === 'bottom' ? 'w-full' : 'w-full'}
-              ${preferences?.imageSize === 'small' ? 'md:w-1/4' : preferences?.imageSize === 'large' ? 'md:w-1/2' : 'md:w-1/3'}
-              ${preferences?.layout === 'compact' ? 'p-2' : preferences?.layout === 'expanded' ? 'p-6' : 'p-4'}
-            `} style={{ maxHeight: preferences?.imagePosition === 'bottom' ? '300px' : 'calc(100vh - 80px)' }}>
+              ${preferences?.imageSize === 'small' ? 'md:w-1/5' : preferences?.imageSize === 'large' ? 'md:w-1/3' : 'md:w-1/4'}
+              ${preferences?.layout === 'compact' ? 'p-2' : preferences?.layout === 'expanded' ? 'p-4' : 'p-3'}
+            `} style={{ maxHeight: preferences?.imagePosition === 'bottom' ? '300px' : 'calc(100vh - 180px)' }}>
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-semibold text-gray-700">AI Generated Image</h3>
               <label className="flex items-center text-sm">
@@ -845,8 +699,8 @@ const Reader = () => {
 
         {/* Modals for bookmarks and notes */}
         {showBookmarks && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full max-h-[80vh] overflow-y-auto">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowBookmarks(false)}>
+            <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
               <BookmarkList
                 bookmarks={currentNovel?.bookmarks || []}
                 novelId={currentNovel?._id}
@@ -858,8 +712,8 @@ const Reader = () => {
         )}
 
         {showNotes && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full max-h-[80vh] overflow-y-auto">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowNotes(false)}>
+            <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
               <NotesList
                 notes={currentNovel?.notes || []}
                 novelId={currentNovel?._id}
@@ -872,22 +726,26 @@ const Reader = () => {
 
         {/* Reading Settings Modal */}
         {showSettings && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <ReadingSettingsPanel onClose={() => setShowSettings(false)} />
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowSettings(false)}>
+            <div onClick={(e) => e.stopPropagation()}>
+              <ReadingSettingsPanel onClose={() => setShowSettings(false)} />
+            </div>
           </div>
         )}
 
         {/* Layout Settings Modal */}
         {showLayoutSettings && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <LayoutSettingsPanel onClose={() => setShowLayoutSettings(false)} />
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowLayoutSettings(false)}>
+            <div onClick={(e) => e.stopPropagation()}>
+              <LayoutSettingsPanel onClose={() => setShowLayoutSettings(false)} />
+            </div>
           </div>
         )}
 
         {/* Annotations Modal */}
         {showAnnotations && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full max-h-[80vh] overflow-y-auto">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowAnnotations(false)}>
+            <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
               <AnnotationsList
                 novelId={currentNovel?._id}
                 onNavigate={handlePageChange}
@@ -899,27 +757,145 @@ const Reader = () => {
 
         {/* Share Passage Modal */}
         {showSharePassage && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <SharePassageModal
-              novelId={currentNovel?._id}
-              page={currentPage}
-              content={selectedPassage}
-              imageId={currentImages.length > 0 ? currentImages[0]._id : null}
-              onClose={() => setShowSharePassage(false)}
-            />
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowSharePassage(false)}>
+            <div onClick={(e) => e.stopPropagation()}>
+              <SharePassageModal
+                novelId={currentNovel?._id}
+                page={currentPage}
+                content={selectedPassage}
+                imageId={currentImages.length > 0 ? currentImages[0]._id : null}
+                onClose={() => setShowSharePassage(false)}
+              />
+            </div>
           </div>
         )}
 
         {/* Share Progress Modal */}
         {showShareProgress && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <ShareProgressCard
-              novelId={currentNovel?._id}
-              onClose={() => setShowShareProgress(false)}
-            />
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowShareProgress(false)}>
+            <div onClick={(e) => e.stopPropagation()}>
+              <ShareProgressCard
+                novelId={currentNovel?._id}
+                onClose={() => setShowShareProgress(false)}
+              />
+            </div>
           </div>
         )}
       </div>
+
+      {/* Navigation controls at the bottom (hidden in paginated mode) */}
+      {readingMode !== 'paginated' && (
+        <div className="themed-bg-primary shadow-md p-4 themed-text-primary w-full sticky bottom-0 z-10">
+          <div className="max-w-7xl mx-auto flex flex-col space-y-2 md:space-y-0 md:flex-row md:items-center md:justify-between">
+            {/* Page navigation */}
+            <div className="flex items-center justify-between md:w-1/3">
+              <button
+                onClick={() => {
+                  if (readingMode === 'continuous' && continuousContent.length > 0) {
+                    // In continuous mode, move back by the number of pages displayed
+                    const firstPage = continuousContent[0]?.page || currentPage;
+                    const pagesToMove = Math.max(3, continuousContent.length);
+                    handlePageChange(Math.max(1, firstPage - pagesToMove));
+                  } else {
+                    // In single mode, just move back one page
+                    handlePageChange(currentPage - 1);
+                  }
+                }}
+                disabled={currentPage <= 1 || loading}
+                className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:bg-blue-300 transition"
+              >
+                Previous
+              </button>
+
+              <button
+                onClick={() => {
+                  if (readingMode === 'continuous' && continuousContent.length > 0) {
+                    // In continuous mode, move forward by the number of pages displayed
+                    const lastPage = continuousContent[continuousContent.length - 1]?.page || currentPage;
+                    handlePageChange(Math.min(currentNovel?.totalPages || 1, lastPage + 1));
+                  } else {
+                    // In single mode, just move forward one page
+                    handlePageChange(currentPage + 1);
+                  }
+                }}
+                disabled={currentPage >= (currentNovel?.totalPages || 1) || loading}
+                className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:bg-blue-300 transition"
+              >
+                Next
+              </button>
+            </div>
+
+            {/* Progress bar */}
+            <div className="md:w-1/3 px-4">
+              <div className="w-full bg-gray-200 rounded-full h-2.5">
+                <div
+                  className="bg-blue-600 h-2.5 rounded-full"
+                  style={{
+                    width: `${Math.min(100, Math.max(0, (Math.min(currentPage, currentNovel?.totalPages || 1) / (currentNovel?.totalPages || 1)) * 100))}%`
+                  }}
+                ></div>
+              </div>
+              <div className="text-center mt-1 text-sm text-gray-600">
+                {readingMode === 'continuous' && continuousContent.length > 0 ? (
+                  <span>Pages {continuousContent[0]?.page} - {continuousContent[continuousContent.length-1]?.page} of {currentNovel?.totalPages || '?'}</span>
+                ) : (
+                  <span>Page {Math.min(currentPage, currentNovel?.totalPages || 1)} of {currentNovel?.totalPages || '?'}</span>
+                )}
+              </div>
+            </div>
+
+            {/* Controls */}
+            <div className="flex items-center justify-between md:w-1/3 space-x-2">
+              <div className="flex items-center">
+                <span className="mr-2 whitespace-nowrap">Jump:</span>
+                <input
+                  type="number"
+                  min="1"
+                  max={currentNovel?.totalPages || 1}
+                  value={jumpToPage || currentPage}
+                  onChange={(e) => setJumpToPage(parseInt(e.target.value) || '')}
+                  className="w-16 px-2 py-1 border border-gray-300 rounded-md mr-2"
+                />
+                <button
+                  onClick={() => {
+                    if (jumpToPage) {
+                      handlePageChange(jumpToPage);
+                      setJumpToPage('');
+                    }
+                  }}
+                  disabled={loading || !jumpToPage}
+                  className="bg-gray-200 text-gray-700 py-1 px-3 rounded-md hover:bg-gray-300 transition"
+                >
+                  Go
+                </button>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <div className="flex space-x-1">
+                  <button
+                    onClick={() => setReaderMode('single')}
+                    className={`px-2 py-1 text-xs rounded-md transition whitespace-nowrap ${readingMode === 'single' ? 'bg-blue-600 text-white font-bold' : 'bg-gray-200 text-gray-700'}`}
+                  >
+                    Single
+                  </button>
+                  <button
+                    onClick={() => setReaderMode('continuous')}
+                    className={`px-2 py-1 text-xs rounded-md transition whitespace-nowrap ${readingMode === 'continuous' ? 'bg-blue-600 text-white font-bold' : 'bg-gray-200 text-gray-700'}`}
+                  >
+                    Continuous
+                  </button>
+                </div>
+                <button
+                  onClick={() => setShowSettings(true)}
+                  className="px-2 py-1 text-xs rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 transition"
+                >
+                  <span role="img" aria-label="Settings">⚙️</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

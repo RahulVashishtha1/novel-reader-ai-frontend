@@ -29,7 +29,10 @@ export const updateReadingPreferences = createAsyncThunk(
 // Initial state
 const initialState = {
   preferences: {
-    // Appearance preferences
+    // Global theme preference
+    globalTheme: 'light', // 'light', 'dark', or 'sepia'
+
+    // Book container appearance preferences
     theme: 'light',
     fontSize: 16,
     fontFamily: 'system-ui',
@@ -54,7 +57,12 @@ const preferencesSlice = createSlice({
   name: 'preferences',
   initialState,
   reducers: {
-    // Appearance preferences
+    // Global theme preference
+    setGlobalTheme: (state, action) => {
+      state.preferences.globalTheme = action.payload;
+    },
+
+    // Book container appearance preferences
     setTheme: (state, action) => {
       state.preferences.theme = action.payload;
     },
@@ -131,7 +139,10 @@ const preferencesSlice = createSlice({
 });
 
 export const {
-  // Appearance preferences
+  // Global theme preference
+  setGlobalTheme,
+
+  // Book container appearance preferences
   setTheme,
   setFontSize,
   setFontFamily,

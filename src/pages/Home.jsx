@@ -5,20 +5,20 @@ const Home = () => {
   const { isAuthenticated } = useSelector((state) => state.auth);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen themed-bg-secondary">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center">
-          <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl sm:tracking-tight lg:text-6xl">
+          <h1 className="text-4xl font-extrabold themed-text-primary sm:text-5xl sm:tracking-tight lg:text-6xl">
             VisNovel
           </h1>
-          <p className="mt-5 max-w-xl mx-auto text-xl text-gray-500">
+          <p className="mt-5 max-w-xl mx-auto text-xl themed-text-secondary">
             AI-Powered Novel Reader with Image Generation
           </p>
         </div>
 
         <div className="mt-10">
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-            <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="themed-bg-primary overflow-hidden shadow rounded-lg">
               <div className="px-4 py-5 sm:p-6">
                 <div className="flex items-center">
                   <div className="flex-shrink-0 bg-blue-500 rounded-md p-3">
@@ -38,10 +38,10 @@ const Home = () => {
                     </svg>
                   </div>
                   <div className="ml-5">
-                    <h3 className="text-lg font-medium text-gray-900">
+                    <h3 className="text-lg font-medium themed-text-primary">
                       Upload and Read Novels
                     </h3>
-                    <p className="mt-2 text-sm text-gray-500">
+                    <p className="mt-2 text-sm themed-text-secondary">
                       Upload your .txt or .epub novels and read them with a clean, paginated interface.
                     </p>
                   </div>
@@ -49,7 +49,7 @@ const Home = () => {
               </div>
             </div>
 
-            <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="themed-bg-primary overflow-hidden shadow rounded-lg">
               <div className="px-4 py-5 sm:p-6">
                 <div className="flex items-center">
                   <div className="flex-shrink-0 bg-purple-500 rounded-md p-3">
@@ -69,10 +69,10 @@ const Home = () => {
                     </svg>
                   </div>
                   <div className="ml-5">
-                    <h3 className="text-lg font-medium text-gray-900">
+                    <h3 className="text-lg font-medium themed-text-primary">
                       AI Image Generation
                     </h3>
-                    <p className="mt-2 text-sm text-gray-500">
+                    <p className="mt-2 text-sm themed-text-secondary">
                       Generate AI-powered images for each page to enhance your reading experience.
                     </p>
                   </div>
@@ -80,7 +80,7 @@ const Home = () => {
               </div>
             </div>
 
-            <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="themed-bg-primary overflow-hidden shadow rounded-lg">
               <div className="px-4 py-5 sm:p-6">
                 <div className="flex items-center">
                   <div className="flex-shrink-0 bg-green-500 rounded-md p-3">
@@ -100,10 +100,10 @@ const Home = () => {
                     </svg>
                   </div>
                   <div className="ml-5">
-                    <h3 className="text-lg font-medium text-gray-900">
+                    <h3 className="text-lg font-medium themed-text-primary">
                       Bookmarks and Notes
                     </h3>
-                    <p className="mt-2 text-sm text-gray-500">
+                    <p className="mt-2 text-sm themed-text-secondary">
                       Add bookmarks and personal notes to keep track of important passages.
                     </p>
                   </div>
@@ -111,7 +111,7 @@ const Home = () => {
               </div>
             </div>
 
-            <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="themed-bg-primary overflow-hidden shadow rounded-lg">
               <div className="px-4 py-5 sm:p-6">
                 <div className="flex items-center">
                   <div className="flex-shrink-0 bg-red-500 rounded-md p-3">
@@ -131,10 +131,10 @@ const Home = () => {
                     </svg>
                   </div>
                   <div className="ml-5">
-                    <h3 className="text-lg font-medium text-gray-900">
+                    <h3 className="text-lg font-medium themed-text-primary">
                       Reading Statistics
                     </h3>
-                    <p className="mt-2 text-sm text-gray-500">
+                    <p className="mt-2 text-sm themed-text-secondary">
                       Track your reading progress, time spent, and other statistics.
                     </p>
                   </div>
@@ -142,7 +142,7 @@ const Home = () => {
               </div>
             </div>
 
-            <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="themed-bg-primary overflow-hidden shadow rounded-lg">
               <div className="px-4 py-5 sm:p-6">
                 <div className="flex items-center">
                   <div className="flex-shrink-0 bg-yellow-500 rounded-md p-3">
@@ -162,10 +162,10 @@ const Home = () => {
                     </svg>
                   </div>
                   <div className="ml-5">
-                    <h3 className="text-lg font-medium text-gray-900">
+                    <h3 className="text-lg font-medium themed-text-primary">
                       Personal Bookshelf
                     </h3>
-                    <p className="mt-2 text-sm text-gray-500">
+                    <p className="mt-2 text-sm themed-text-secondary">
                       Manage your collection of novels in your personal bookshelf.
                     </p>
                   </div>
@@ -173,7 +173,7 @@ const Home = () => {
               </div>
             </div>
 
-            <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="themed-bg-primary overflow-hidden shadow rounded-lg">
               <div className="px-4 py-5 sm:p-6">
                 <div className="flex items-center">
                   <div className="flex-shrink-0 bg-indigo-500 rounded-md p-3">
@@ -193,10 +193,10 @@ const Home = () => {
                     </svg>
                   </div>
                   <div className="ml-5">
-                    <h3 className="text-lg font-medium text-gray-900">
+                    <h3 className="text-lg font-medium themed-text-primary">
                       Secure Authentication
                     </h3>
-                    <p className="mt-2 text-sm text-gray-500">
+                    <p className="mt-2 text-sm themed-text-secondary">
                       Your novels and reading data are securely stored and accessible only to you.
                     </p>
                   </div>
@@ -218,7 +218,7 @@ const Home = () => {
             <div className="space-x-4">
               <Link
                 to="/login"
-                className="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50"
+                className="inline-flex items-center px-6 py-3 border themed-border text-base font-medium rounded-md shadow-sm themed-text-primary themed-bg-primary hover:opacity-90"
               >
                 Login
               </Link>
