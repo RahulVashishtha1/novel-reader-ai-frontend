@@ -389,31 +389,31 @@ const Reader = () => {
   };
 
   return (
-    <div className=" themed-bg-secondary flex flex-col w-full max-w-none items-center">
+    <div className="themed-bg-secondary flex flex-col w-full max-w-none">
       {/* Main content */}
       <div
-        className="flex-grow flex flex-col md:flex-row overflow-hidden"
-        // style={{ height: "calc(100vh - 120px)" }}
+        className="flex-grow flex flex-col md:flex-row overflow-hidden w-full"
+        style={{ height: "calc(100vh - 120px)" }}
       >
         {/* Customizable layout for reading */}
         <div
           className={`
           flex-grow flex flex-col ${
-            preferences?.layout !== "compact" ? "px-3 py-4" : "p-2"
-          } overflow-hidden min-h-0 min-w-0  mx-auto w-full
+            preferences?.layout !== "compact" ? "px-2 py-3" : "p-1"
+          } overflow-hidden min-h-0 min-w-0 w-full
           ${
             preferences?.imagePosition === "bottom"
               ? "md:flex-col"
               : "md:flex-row"
           }
-          ${preferences?.layout === "expanded" ? "space-x-3 space-y-3" : ""}
+          ${preferences?.layout === "expanded" ? "space-x-2 space-y-2" : ""}
         `}
         >
           {/* Tools panel (conditionally shown) */}
           {showTools && (
             <div
               className={`
-             min-w-fit flex-shrink-0 themed-bg-primary shadow-md p-4 z-10 themed-text-primary overflow-y-auto mr-2 rounded-lg
+             min-w-fit flex-shrink-0 themed-bg-primary shadow-md p-4 z-10 themed-text-primary overflow-y-auto mr-2 rounded-lg  
             ${preferences?.toolbarPosition === "hidden" ? "hidden" : ""}
             ${
               preferences?.toolbarPosition === "top"
@@ -662,11 +662,11 @@ const Reader = () => {
             flex-1 flex flex-col h-full min-h-0 w-full
             ${
               preferences?.imagePosition === "left"
-                ? "md:order-last md:ml-2"
-                : "md:mr-2"
+                ? "md:order-last md:ml-1"
+                : "md:mr-1"
             }
-            ${preferences?.imagePosition === "bottom" ? "mb-4" : "md:mb-0"}
-            ${preferences?.layout === "compact" ? "mr-0 mb-2" : "mb-4"}
+            ${preferences?.imagePosition === "bottom" ? "mb-2" : "md:mb-0"}
+            ${preferences?.layout === "compact" ? "mr-0 mb-1" : "mb-2"}
           `}
           >
             <BookThemeProvider>
@@ -676,15 +676,15 @@ const Reader = () => {
                 shadow-md rounded-lg flex-grow overflow-auto w-full
                 ${
                   preferences?.layout === "compact"
-                    ? "p-3"
+                    ? "p-2"
                     : preferences?.layout === "expanded"
-                    ? "p-6"
-                    : "p-5"
+                    ? "p-4"
+                    : "p-3"
                 }
               `}
                 style={{
-                  height: "calc(100vh - 180px)",
-                  maxHeight: "calc(100vh - 180px)",
+                  height: "calc(100vh - 160px)",
+                  maxHeight: "calc(100vh - 160px)",
                 }}
               >
                 {error && (
@@ -699,7 +699,7 @@ const Reader = () => {
                   </div>
                 ) : readingMode === "continuous" &&
                   continuousContent.length > 0 ? (
-                  <div className="prose max-w-none">
+                  <div className="prose max-w-none whitespace-pre-wrap">
                     {continuousContent.map((item) => (
                       <div key={item.page} className="mb-8">
                         <div className="text-sm text-gray-500 mb-2 border-t pt-2">
@@ -716,7 +716,7 @@ const Reader = () => {
                   </div>
                 ) : readingMode === "scroll" && continuousContent.length > 0 ? (
                   <div
-                    className="prose max-w-none overflow-y-auto"
+                    className="prose max-w-none overflow-y-auto whitespace-pre-wrap"
                     style={{ maxHeight: "calc(100vh - 250px)" }}
                   >
                     {continuousContent.map((item) => (
@@ -735,7 +735,7 @@ const Reader = () => {
                   </div>
                 ) : readingMode === "paginated" ? (
                   <div className="prose max-w-none h-full flex flex-col justify-between">
-                    <div className="flex-grow overflow-hidden">
+                    <div className="flex-grow overflow-hidden whitespace-pre-wrap">
                       <TextHighlighter
                         content={pageData.content}
                         novelId={id}
@@ -781,28 +781,28 @@ const Reader = () => {
           {preferences?.imagePosition !== "hidden" && (
             <div
               className={`
-              themed-bg-primary shadow-md rounded-lg p-4 flex flex-col themed-text-primary
+              themed-bg-primary shadow-md rounded-lg p-2 flex flex-col themed-text-primary min-w-fit
               ${preferences?.imagePosition === "bottom" ? "w-full" : "w-full"}
               ${
                 preferences?.imageSize === "small"
-                  ? "md:w-1/5"
+                  ? "md:w-1/6"
                   : preferences?.imageSize === "large"
-                  ? "md:w-1/3"
-                  : "md:w-1/4"
+                  ? "md:w-1/4"
+                  : "md:w-1/5"
               }
               ${
                 preferences?.layout === "compact"
-                  ? "p-2"
+                  ? "p-1"
                   : preferences?.layout === "expanded"
-                  ? "p-4"
-                  : "p-3"
+                  ? "p-3"
+                  : "p-2"
               }
             `}
               style={{
                 maxHeight:
                   preferences?.imagePosition === "bottom"
-                    ? "300px"
-                    : "calc(100vh - 180px)",
+                    ? "250px"
+                    : "calc(100vh - 160px)",
               }}
             >
               <div className="flex justify-between items-center mb-4">
@@ -1030,7 +1030,7 @@ const Reader = () => {
 
       {/* Navigation controls at the bottom (hidden in paginated mode) */}
       {readingMode !== "paginated" && (
-        <div className="themed-bg-primary shadow-md p-4 themed-text-primary sticky bottom-2 z-10 rounded-full flex  items-center w-4/5 justify-evenly">
+        <div className="themed-bg-primary shadow-md p-3 themed-text-primary sticky bottom-2 z-10 rounded-full flex items-center w-11/12 mx-auto justify-evenly">
           <div className=" flex space-y-2 md:space-y-0 md:flex-row md:items-center md:justify-between justify-around min-w-fit items-center  ">
             <div className="text-md font-bold text-gray-900 truncate themed-text-primary min-w-min">
               {currentNovel?.title || "Loading..."}

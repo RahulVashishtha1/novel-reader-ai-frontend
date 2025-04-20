@@ -294,7 +294,7 @@ const TextHighlighter = ({ content, novelId, page, isHtml = false }) => {
       {/* Content with annotations */}
       <div
         ref={contentRef}
-        className="prose max-w-none"
+        className="prose max-w-none whitespace-pre-wrap"
         onMouseUp={handleTextSelection}
         dangerouslySetInnerHTML={{ __html: renderContentWithAnnotations() }}
       />
