@@ -6,10 +6,25 @@ export const generateImage = createAsyncThunk(
   'images/generate',
   async ({ novelId, page, style }, { rejectWithValue }) => {
     try {
+      console.log(`Generating image for novel ${novelId}, page ${page}, style ${style}`);
       const response = await imageAPI.generateImage(novelId, page, style);
+      console.log("Image generation response:", response);
+      console.log("Image data:", response.data);
+
+      // Check if the image has an error field
+      if (response.data.image && response.data.image.error) {
+        console.warn('Image generated with error:', response.data.image.error);
+      }
+
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response.data.message || 'Image generation failed');
+      console.error('Image generation failed:', error);
+      // More detailed error logging
+      if (error.response) {
+        console.error('Error response:', error.response.data);
+        return rejectWithValue(error.response.data.message || 'Image generation failed');
+      }
+      return rejectWithValue(error.message || 'Image generation failed');
     }
   }
 );
@@ -18,10 +33,23 @@ export const getImagesForPage = createAsyncThunk(
   'images/getImagesForPage',
   async ({ novelId, page }, { rejectWithValue }) => {
     try {
+      console.log(`Getting images for novel ${novelId}, page ${page}`);
       const response = await imageAPI.getImagesForPage(novelId, page);
+      console.log('Images for page response:', response.data);
+
+      // Log if no images were found
+      if (!response.data.images || response.data.images.length === 0) {
+        console.log('No images found for this page');
+      }
+
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response.data.message || 'Failed to get images');
+      console.error('Failed to get images:', error);
+      if (error.response) {
+        console.error('Error response:', error.response.data);
+        return rejectWithValue(error.response.data.message || 'Failed to get images');
+      }
+      return rejectWithValue(error.message || 'Failed to get images');
     }
   }
 );
