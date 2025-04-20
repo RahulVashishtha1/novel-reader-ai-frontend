@@ -74,6 +74,10 @@ body {
   background-color: var(--accent-color);
 }
 
+.themed-accent-border {
+  border-color: var(--accent-color);
+}
+
 /* Body and App Container Theme Classes */
 body.light-theme,
 .app-container[data-theme="light"],

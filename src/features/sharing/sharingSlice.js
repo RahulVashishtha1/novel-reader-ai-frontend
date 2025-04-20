@@ -111,7 +111,7 @@ const sharingSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      
+
       // Share passage
       .addCase(sharePassage.pending, (state) => {
         state.loading = true;
@@ -126,7 +126,7 @@ const sharingSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      
+
       // Share progress
       .addCase(shareProgress.pending, (state) => {
         state.loading = true;
@@ -141,7 +141,7 @@ const sharingSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      
+
       // Generate social image
       .addCase(generateSocialImage.pending, (state) => {
         state.loading = true;
@@ -155,7 +155,7 @@ const sharingSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      
+
       // Get user shared content
       .addCase(getUserSharedContent.pending, (state) => {
         state.loading = true;
@@ -169,7 +169,7 @@ const sharingSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      
+
       // Delete shared content
       .addCase(deleteSharedContent.pending, (state) => {
         state.loading = true;

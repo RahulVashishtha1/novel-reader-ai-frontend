@@ -413,16 +413,16 @@ const Reader = () => {
           {showTools && (
             <div
               className={`
-             min-w-fit flex-shrink-0 themed-bg-primary shadow-md p-4 z-10 themed-text-primary overflow-y-auto mr-2 rounded-lg  
+             min-w-[200px] w-[250px] flex-shrink-0 themed-bg-primary shadow-md p-2 z-10 themed-text-primary overflow-y-auto mr-1 rounded-lg novel-content-scrollbar
             ${preferences?.toolbarPosition === "hidden" ? "hidden" : ""}
             ${
               preferences?.toolbarPosition === "top"
-                ? "w-full h-auto mb-4"
+                ? "w-full h-auto mb-2"
                 : "absolute md:relative"
             }
             ${
               preferences?.toolbarPosition === "left"
-                ? "order-first left-0 md:mr-2"
+                ? "order-first left-0 md:mr-1"
                 : "right-0"
             }
             ${preferences?.toolbarPosition !== "top" ? "" : "top-0"}
@@ -433,113 +433,113 @@ const Reader = () => {
             }
             ${
               preferences?.layout === "compact"
-                ? "md:p-2"
+                ? "md:p-1"
                 : preferences?.layout === "expanded"
-                ? "md:p-6"
-                : "md:p-4"
+                ? "md:p-3"
+                : "md:p-2"
             }
           `}
           style={{
-                  height: "calc(100vh - 180px)",
-                  maxHeight: "calc(100vh - 180px)",
+                  height: "calc(100vh - 160px)",
+                  maxHeight: "calc(100vh - 160px)",
                 }}
             >
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="font-semibold text-gray-700">Tools</h3>
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="font-semibold themed-text-primary text-sm">Tools</h3>
                 <button
                   onClick={() => setShowTools(false)}
-                  className="text-gray-500 hover:text-gray-700"
+                  className="themed-text-secondary hover:themed-text-primary text-sm"
                 >
                   ✕
                 </button>
               </div>
 
-              <div className="space-y-8">
+              <div className="space-y-4">
                 <div>
-                  <h4 className="font-medium text-gray-700 mb-2">Bookmarks</h4>
+                  <h4 className="font-medium themed-text-primary mb-1 text-sm">Bookmarks</h4>
                   <button
                     onClick={() => {
                       setShowBookmarks(!showBookmarks);
                       setShowNotes(false);
                     }}
-                    className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 transition flex items-center"
+                    className="w-full themed-bg-secondary themed-text-primary py-1.5 px-3 rounded-md hover:bg-gray-300 dark:hover:bg-gray-700 transition flex items-center text-sm"
                   >
-                    <span className="mr-2">🔖</span> View Bookmarks
+                    <span className="mr-1">🔖</span> View Bookmarks
                   </button>
                   <button
                     onClick={() => {
                       setShowAddBookmark(!showAddBookmark);
                       setShowAddNote(false);
                     }}
-                    className="w-full mt-2 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition flex items-center"
+                    className="w-full mt-2 themed-accent-bg text-white py-1.5 px-3 rounded-md hover:bg-blue-700 transition flex items-center text-sm"
                   >
-                    <span className="mr-2">+</span> Add Bookmark
+                    <span className="mr-1">+</span> Add Bookmark
                   </button>
                 </div>
 
                 <div>
-                  <h4 className="font-medium text-gray-700 mb-2">Notes</h4>
+                  <h4 className="font-medium themed-text-primary mb-1 text-sm">Notes</h4>
                   <button
                     onClick={() => {
                       setShowNotes(!showNotes);
                       setShowBookmarks(false);
                     }}
-                    className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 transition flex items-center"
+                    className="w-full themed-bg-secondary themed-text-primary py-1.5 px-3 rounded-md hover:bg-gray-300 dark:hover:bg-gray-700 transition flex items-center text-sm"
                   >
-                    <span className="mr-2">📝</span> View Notes
+                    <span className="mr-1">📝</span> View Notes
                   </button>
                   <button
                     onClick={() => {
                       setShowAddNote(!showAddNote);
                       setShowAddBookmark(false);
                     }}
-                    className="w-full mt-2 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition flex items-center"
+                    className="w-full mt-2 themed-accent-bg text-white py-1.5 px-3 rounded-md hover:bg-blue-700 transition flex items-center text-sm"
                   >
-                    <span className="mr-2">+</span> Add Note
+                    <span className="mr-1">+</span> Add Note
                   </button>
                 </div>
 
                 <div>
-                  <h4 className="font-medium text-gray-700 mb-2">
+                  <h4 className="font-medium themed-text-primary mb-1 text-sm">
                     Reading Mode
                   </h4>
                   <div className="grid grid-cols-2 gap-2 mb-2">
                     <button
                       onClick={() => setReaderMode("single")}
-                      className={`py-2 px-3 rounded-md transition ${
+                      className={`py-1.5 px-3 rounded-md transition text-sm ${
                         readingMode === "single"
-                          ? "bg-blue-600 text-white font-bold"
-                          : "bg-gray-200 text-gray-700"
+                          ? "themed-accent-bg text-white font-bold"
+                          : "themed-bg-secondary themed-text-primary"
                       }`}
                     >
-                      Single Page
+                      Single
                     </button>
                     <button
                       onClick={() => setReaderMode("continuous")}
-                      className={`py-2 px-3 rounded-md transition ${
+                      className={`py-1.5 px-3 rounded-md transition text-sm ${
                         readingMode === "continuous"
-                          ? "bg-blue-600 text-white font-bold"
-                          : "bg-gray-200 text-gray-700"
+                          ? "themed-accent-bg text-white font-bold"
+                          : "themed-bg-secondary themed-text-primary"
                       }`}
                     >
                       Continuous
                     </button>
                     <button
                       onClick={() => setReaderMode("scroll")}
-                      className={`py-2 px-3 rounded-md transition ${
+                      className={`py-1.5 px-3 rounded-md transition text-sm ${
                         readingMode === "scroll"
-                          ? "bg-blue-600 text-white font-bold"
-                          : "bg-gray-200 text-gray-700"
+                          ? "themed-accent-bg text-white font-bold"
+                          : "themed-bg-secondary themed-text-primary"
                       }`}
                     >
-                      Scrollable
+                      Scroll
                     </button>
                     <button
                       onClick={() => setReaderMode("paginated")}
-                      className={`py-2 px-3 rounded-md transition ${
+                      className={`py-1.5 px-3 rounded-md transition text-sm ${
                         readingMode === "paginated"
-                          ? "bg-blue-600 text-white font-bold"
-                          : "bg-gray-200 text-gray-700"
+                          ? "themed-accent-bg text-white font-bold"
+                          : "themed-bg-secondary themed-text-primary"
                       }`}
                     >
                       Paginated
@@ -548,7 +548,7 @@ const Reader = () => {
                 </div>
 
                 <div>
-                  <h4 className="font-medium text-gray-700 mb-2">
+                  <h4 className="font-medium themed-text-primary mb-1 text-sm">
                     Annotations
                   </h4>
                   <button
@@ -557,50 +557,50 @@ const Reader = () => {
                       setShowBookmarks(false);
                       setShowNotes(false);
                     }}
-                    className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 transition flex items-center"
+                    className="w-full themed-bg-secondary themed-text-primary py-1.5 px-3 rounded-md hover:bg-gray-300 dark:hover:bg-gray-700 transition flex items-center text-sm"
                   >
-                    <span className="mr-2">🔍</span> View Annotations
+                    <span className="mr-1">🔍</span> View Annotations
                   </button>
                 </div>
 
                 <div>
-                  <h4 className="font-medium text-gray-700 mb-2">Share</h4>
+                  <h4 className="font-medium themed-text-primary mb-1 text-sm">Share</h4>
                   <button
                     onClick={handleSharePassage}
-                    className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 transition flex items-center mb-2"
+                    className="w-full themed-bg-secondary themed-text-primary py-1.5 px-3 rounded-md hover:bg-gray-300 dark:hover:bg-gray-700 transition flex items-center mb-2 text-sm"
                   >
-                    <span className="mr-2">🔗</span> Share Passage
+                    <span className="mr-1">🔗</span> Share Passage
                   </button>
                   <button
                     onClick={handleShareProgress}
-                    className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 transition flex items-center"
+                    className="w-full themed-bg-secondary themed-text-primary py-1.5 px-3 rounded-md hover:bg-gray-300 dark:hover:bg-gray-700 transition flex items-center text-sm"
                   >
-                    <span className="mr-2">📈</span> Share Progress
+                    <span className="mr-1">📈</span> Share Progress
                   </button>
                 </div>
 
                 <div>
-                  <h4 className="font-medium text-gray-700 mb-2">
+                  <h4 className="font-medium themed-text-primary mb-1 text-sm">
                     Display Settings
                   </h4>
                   <button
                     onClick={() => setShowSettings(true)}
-                    className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 transition flex items-center mb-2"
+                    className="w-full themed-bg-secondary themed-text-primary py-1.5 px-3 rounded-md hover:bg-gray-300 dark:hover:bg-gray-700 transition flex items-center mb-2 text-sm"
                   >
-                    <span className="mr-2">⚙️</span> Customize Appearance
+                    <span className="mr-1">⚙️</span> Appearance
                   </button>
                   <button
                     onClick={() => setShowLayoutSettings(true)}
-                    className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 transition flex items-center"
+                    className="w-full themed-bg-secondary themed-text-primary py-1.5 px-3 rounded-md hover:bg-gray-300 dark:hover:bg-gray-700 transition flex items-center text-sm"
                   >
-                    <span className="mr-2">🖰</span> Customize Layout
+                    <span className="mr-2">🖰</span> Layout
                   </button>
                 </div>
               </div>
 
               {showAddBookmark && (
-                <div className="mt-4 p-3 border border-gray-200 rounded-md">
-                  <h4 className="font-medium text-gray-700 mb-2">
+                <div className="mt-4 p-3 border themed-border rounded-md themed-bg-secondary">
+                  <h4 className="font-medium themed-text-primary mb-2">
                     Add Bookmark
                   </h4>
                   <input
@@ -608,18 +608,18 @@ const Reader = () => {
                     value={bookmarkName}
                     onChange={(e) => setBookmarkName(e.target.value)}
                     placeholder="Bookmark name (optional)"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md mb-2"
+                    className="w-full px-3 py-2 border themed-border rounded-md mb-2 themed-bg-primary themed-text-primary"
                   />
                   <div className="flex justify-end space-x-2">
                     <button
                       onClick={() => setShowAddBookmark(false)}
-                      className="px-3 py-1 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100"
+                      className="px-3 py-1 border themed-border rounded-md themed-text-primary hover:bg-gray-100 dark:hover:bg-gray-700"
                     >
                       Cancel
                     </button>
                     <button
                       onClick={handleAddBookmark}
-                      className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                      className="px-3 py-1 themed-accent-bg text-white rounded-md hover:bg-blue-700"
                     >
                       Save
                     </button>
@@ -628,25 +628,25 @@ const Reader = () => {
               )}
 
               {showAddNote && (
-                <div className="mt-4 p-3 border border-gray-200 rounded-md">
-                  <h4 className="font-medium text-gray-700 mb-2">Add Note</h4>
+                <div className="mt-4 p-3 border themed-border rounded-md themed-bg-secondary">
+                  <h4 className="font-medium themed-text-primary mb-2">Add Note</h4>
                   <textarea
                     value={noteContent}
                     onChange={(e) => setNoteContent(e.target.value)}
                     placeholder="Enter your note..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md mb-2"
+                    className="w-full px-3 py-2 border themed-border rounded-md mb-2 themed-bg-primary themed-text-primary"
                     rows="3"
                   ></textarea>
                   <div className="flex justify-end space-x-2">
                     <button
                       onClick={() => setShowAddNote(false)}
-                      className="px-3 py-1 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100"
+                      className="px-3 py-1 border themed-border rounded-md themed-text-primary hover:bg-gray-100 dark:hover:bg-gray-700"
                     >
                       Cancel
                     </button>
                     <button
                       onClick={handleAddNote}
-                      className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                      className="px-3 py-1 themed-accent-bg text-white rounded-md hover:bg-blue-700"
                     >
                       Save
                     </button>
@@ -673,7 +673,7 @@ const Reader = () => {
               <div
                 id="novel-content"
                 className={`
-                shadow-md rounded-lg flex-grow overflow-auto w-full
+                shadow-md rounded-lg flex-grow overflow-auto w-full novel-content-scrollbar
                 ${
                   preferences?.layout === "compact"
                     ? "p-2"
@@ -803,28 +803,30 @@ const Reader = () => {
                   preferences?.imagePosition === "bottom"
                     ? "250px"
                     : "calc(100vh - 160px)",
+                display: "flex",
+                flexDirection: "column"
               }}
             >
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="font-semibold text-gray-700">
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="font-semibold themed-text-primary text-base">
                   AI Generated Image
                 </h3>
-                <label className="flex items-center text-sm">
+                <label className="flex items-center text-sm themed-text-primary">
                   <input
                     type="checkbox"
                     checked={autoGenerateImage}
                     onChange={toggleAutoGenerateImage}
-                    className="mr-2"
+                    className="mr-1"
                   />
                   Auto Generate
                 </label>
               </div>
 
               {/* Style selection */}
-              <div className="mb-4">
-                <label className="text-sm text-gray-700 block mb-1">Image Style:</label>
+              <div className="mb-2">
+                <label className="text-sm themed-text-primary block mb-1">Image Style:</label>
                 <select
-                  className="w-full p-2 border border-gray-300 rounded-md bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  className="w-full p-1.5 text-sm border themed-border rounded-md themed-bg-primary themed-text-primary"
                   value={imageStyle || 'default'}
                   onChange={(e) => setImageStyle(e.target.value)}
                 >
@@ -842,7 +844,7 @@ const Reader = () => {
                     <img
                       src={`http://localhost:5000/uploads/${currentImages[0].imageUrl}`}
                       alt={`Generated for page ${currentPage}`}
-                      className="max-w-full max-h-[60vh] object-contain rounded-md mx-auto"
+                      className="max-w-full max-h-[55vh] object-contain rounded-md mx-auto"
                       onError={(e) => {
                         console.error('Image failed to load:', currentImages[0]);
                         e.target.onerror = null; // Prevent infinite loop
@@ -863,19 +865,19 @@ const Reader = () => {
                     )}
                   </div>
 
-                  <div className="mt-4 flex justify-center space-x-2">
+                  <div className="mt-1 mb-2 flex justify-center relative z-10">
                     <button
                       onClick={handleGenerateImage}
                       disabled={generatingImage}
-                      className={`text-white py-1 px-3 text-sm rounded-md transition flex items-center ${generatingImage ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
+                      className={`text-white py-1 px-3 text-sm rounded-md transition flex items-center max-w-full ${generatingImage ? 'bg-blue-400 cursor-not-allowed' : 'themed-accent-bg hover:bg-blue-700'}`}
                     >
                       {generatingImage ? (
                         <>
-                          <span className="mr-1 animate-spin">⏳</span> Regenerating...
+                          <span className="mr-1 animate-spin">⏳</span> <span className="truncate">Regenerating...</span>
                         </>
                       ) : (
                         <>
-                          <span className="mr-1">🔄</span> Regenerate
+                          <span className="mr-1">🔄</span> <span className="truncate">Regenerate</span>
                         </>
                       )}
                     </button>
@@ -885,20 +887,20 @@ const Reader = () => {
                 <div className="flex-grow flex flex-col items-center justify-center">
                   {generatingImage ? (
                     <div className="text-center">
-                      <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500 mx-auto mb-2"></div>
-                      <div className="text-gray-500">Generating image...</div>
-                      <div className="text-xs text-gray-400 mt-1">This may take a few moments</div>
+                      <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 themed-accent-border mx-auto mb-2"></div>
+                      <div className="themed-text-primary">Generating image...</div>
+                      <div className="text-xs themed-text-secondary mt-1">This may take a few moments</div>
                     </div>
                   ) : (
                     <>
-                      <div className="text-gray-500 mb-4 text-center">
+                      <div className="themed-text-primary mb-4 text-center">
                         <div className="text-5xl mb-2">🖼️</div>
                         <div>No image generated for this page</div>
                       </div>
                       <button
                         onClick={handleGenerateImage}
                         disabled={generatingImage}
-                        className={`text-white py-2 px-4 rounded-md transition ${generatingImage ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
+                        className={`text-white py-2 px-4 rounded-md transition ${generatingImage ? 'bg-blue-400 cursor-not-allowed' : 'themed-accent-bg hover:bg-blue-700'}`}
                       >
                         Generate Image
                       </button>
@@ -917,7 +919,7 @@ const Reader = () => {
             onClick={() => setShowBookmarks(false)}
           >
             <div
-              className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full max-h-[80vh] overflow-y-auto"
+              className="themed-bg-primary themed-text-primary rounded-lg shadow-lg p-6 max-w-md w-full max-h-[80vh] overflow-y-auto novel-content-scrollbar"
               onClick={(e) => e.stopPropagation()}
             >
               <BookmarkList
@@ -936,7 +938,7 @@ const Reader = () => {
             onClick={() => setShowNotes(false)}
           >
             <div
-              className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full max-h-[80vh] overflow-y-auto"
+              className="themed-bg-primary themed-text-primary rounded-lg shadow-lg p-6 max-w-md w-full max-h-[80vh] overflow-y-auto novel-content-scrollbar"
               onClick={(e) => e.stopPropagation()}
             >
               <NotesList
@@ -982,7 +984,7 @@ const Reader = () => {
             onClick={() => setShowAnnotations(false)}
           >
             <div
-              className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full max-h-[80vh] overflow-y-auto"
+              className="themed-bg-primary themed-text-primary rounded-lg shadow-lg p-6 max-w-md w-full max-h-[80vh] overflow-y-auto novel-content-scrollbar"
               onClick={(e) => e.stopPropagation()}
             >
               <AnnotationsList
@@ -1030,17 +1032,17 @@ const Reader = () => {
 
       {/* Navigation controls at the bottom (hidden in paginated mode) */}
       {readingMode !== "paginated" && (
-        <div className="themed-bg-primary shadow-md p-3 themed-text-primary sticky bottom-2 z-10 rounded-full flex items-center w-11/12 mx-auto justify-evenly">
-          <div className=" flex space-y-2 md:space-y-0 md:flex-row md:items-center md:justify-between justify-around min-w-fit items-center  ">
+        <div className="themed-bg-primary shadow-md p-3 themed-text-primary sticky bottom-2 z-5 rounded-lg flex items-center w-11/12 mx-auto">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between w-full px-4 space-y-2 md:space-y-0">
             <div className="text-md font-bold text-gray-900 truncate themed-text-primary min-w-min">
               {currentNovel?.title || "Loading..."}
             </div>
 
             {/* Progress bar */}
-            <div className="md:w-1/3 px-4 w-4/5">
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
+            <div className="md:w-2/5 w-full">
+              <div className="w-full themed-bg-secondary rounded-full h-2.5">
                 <div
-                  className="bg-blue-600 h-2.5 rounded-full"
+                  className="themed-accent-bg h-2.5 rounded-full"
                   style={{
                     width: `${Math.min(
                       100,
@@ -1054,7 +1056,7 @@ const Reader = () => {
                   }}
                 ></div>
               </div>
-              <div className="text-center mt-1 text-sm text-gray-600">
+              <div className="text-center mt-1 text-sm themed-text-secondary">
                 {readingMode === "continuous" &&
                 continuousContent.length > 0 ? (
                   <span>
@@ -1072,7 +1074,7 @@ const Reader = () => {
             </div>
 
             {/* Page navigation */}
-            <div className="flex items-center justify-evenly md:w-1/3">
+            <div className="flex items-center justify-between md:w-1/3 w-full">
               <button
                 onClick={() => {
                   if (
@@ -1089,7 +1091,7 @@ const Reader = () => {
                   }
                 }}
                 disabled={currentPage <= 1 || loading}
-                className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:bg-blue-300 transition"
+                className="themed-accent-bg text-white py-1.5 px-4 rounded-md hover:bg-blue-700 disabled:bg-blue-300 transition text-sm"
               >
                 Previous
               </button>
@@ -1115,7 +1117,7 @@ const Reader = () => {
                 disabled={
                   currentPage >= (currentNovel?.totalPages || 1) || loading
                 }
-                className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:bg-blue-300 transition"
+                className="themed-accent-bg text-white py-1.5 px-4 rounded-md hover:bg-blue-700 disabled:bg-blue-300 transition text-sm"
               >
                 Next
               </button>
@@ -1124,7 +1126,7 @@ const Reader = () => {
             {/* Controls */}
             <div className="flex items-center justify-between md:w-1/3 space-x-2">
               <div className="flex items-center">
-                <span className="mr-2 whitespace-nowrap">Jump:</span>
+                <span className="mr-2 whitespace-nowrap text-sm themed-text-primary">Jump:</span>
                 <input
                   type="number"
                   min="1"
@@ -1133,7 +1135,7 @@ const Reader = () => {
                   onChange={(e) =>
                     setJumpToPage(parseInt(e.target.value) || "")
                   }
-                  className="w-16 px-2 py-1 border border-gray-300 rounded-md mr-2"
+                  className="w-16 px-2 py-1 border themed-border rounded-md mr-2 text-sm themed-bg-primary themed-text-primary"
                 />
                 <button
                   onClick={() => {
@@ -1143,30 +1145,30 @@ const Reader = () => {
                     }
                   }}
                   disabled={loading || !jumpToPage}
-                  className="bg-gray-200 text-gray-700 py-1 px-3 rounded-md hover:bg-gray-300 transition"
+                  className="themed-bg-secondary themed-text-primary py-1 px-3 rounded-md hover:bg-gray-300 dark:hover:bg-gray-700 transition text-sm"
                 >
                   Go
                 </button>
               </div>
 
               <div className="flex items-center space-x-2">
-                <div className="flex space-x-1">
+                <div className="flex space-x-2">
                   <button
                     onClick={() => setReaderMode("single")}
-                    className={`px-2 py-1 text-xs rounded-md transition whitespace-nowrap ${
+                    className={`px-3 py-1 text-sm rounded-md transition whitespace-nowrap ${
                       readingMode === "single"
-                        ? "bg-blue-600 text-white font-bold"
-                        : "bg-gray-200 text-gray-700"
+                        ? "themed-accent-bg text-white font-bold"
+                        : "themed-bg-secondary themed-text-primary"
                     }`}
                   >
                     Single
                   </button>
                   <button
                     onClick={() => setReaderMode("continuous")}
-                    className={`px-2 py-1 text-xs rounded-md transition whitespace-nowrap ${
+                    className={`px-3 py-1 text-sm rounded-md transition whitespace-nowrap ${
                       readingMode === "continuous"
-                        ? "bg-blue-600 text-white font-bold"
-                        : "bg-gray-200 text-gray-700"
+                        ? "themed-accent-bg text-white font-bold"
+                        : "themed-bg-secondary themed-text-primary"
                     }`}
                   >
                     Continuous
@@ -1174,7 +1176,7 @@ const Reader = () => {
                 </div>
                 <button
                   onClick={() => setShowSettings(true)}
-                  className="px-2 py-1 text-xs rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 transition"
+                  className="px-3 py-1 text-sm rounded-md themed-bg-secondary themed-text-primary hover:bg-gray-300 dark:hover:bg-gray-700 transition"
                 >
                   <span role="img" aria-label="Settings">
                     ⚙️
