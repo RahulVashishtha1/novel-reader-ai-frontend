@@ -90,9 +90,9 @@ const Profile = () => {
   if (loading || !user) {
     console.log('⏳ Profile is still loading or user data is missing');
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+      <div className="min-h-screen themed-bg-secondary flex items-center justify-center">
         <div className="text-center">
-          <div className="text-xl font-semibold mb-2">Loading profile...</div>
+          <div className="text-xl font-semibold themed-text-primary mb-2">Loading profile...</div>
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
         </div>
       </div>
@@ -100,34 +100,44 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 py-8">
+    <div className="min-h-screen themed-bg-secondary py-8">
       <div className="max-w-4xl mx-auto px-4">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold">Your Profile</h1>
-          <p className="text-gray-600">Manage your account and view your shared content</p>
+          <h1 className="text-3xl font-bold themed-text-primary">Your Profile</h1>
+          <p className="themed-text-secondary">Manage your account and view your shared content</p>
         </div>
 
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            {error}
+          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-sm mb-4">
+            <div className="flex items-center">
+              <svg className="h-5 w-5 text-red-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              <span>{error}</span>
+            </div>
           </div>
         )}
 
         {updateSuccess && (
-          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-            Profile updated successfully!
+          <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md shadow-sm mb-4">
+            <div className="flex items-center">
+              <svg className="h-5 w-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              <span>Profile updated successfully!</span>
+            </div>
           </div>
         )}
 
-        <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
-          <div className="border-b border-gray-200">
+        <div className="themed-bg-primary rounded-lg shadow-md overflow-hidden mb-6">
+          <div className="border-b themed-border">
             <nav className="flex">
               <button
                 onClick={() => setActiveTab('profile')}
                 className={`px-6 py-4 text-sm font-medium ${
                   activeTab === 'profile'
                     ? 'border-b-2 border-blue-500 text-blue-600'
-                    : 'text-gray-500 hover:text-gray-700'
+                    : 'themed-text-secondary hover:themed-text-primary'
                 }`}
               >
                 Profile
@@ -137,7 +147,7 @@ const Profile = () => {
                 className={`px-6 py-4 text-sm font-medium ${
                   activeTab === 'shared'
                     ? 'border-b-2 border-blue-500 text-blue-600'
-                    : 'text-gray-500 hover:text-gray-700'
+                    : 'themed-text-secondary hover:themed-text-primary'
                 }`}
               >
                 Shared Content
@@ -152,10 +162,10 @@ const Profile = () => {
                   <div>
                     <div className="mb-6">
                       <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-xl font-bold">Profile Information</h2>
+                        <h2 className="text-xl font-bold themed-text-primary">Profile Information</h2>
                         <button
                           onClick={() => setIsEditing(true)}
-                          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200"
                         >
                           Edit Profile
                         </button>
@@ -163,28 +173,32 @@ const Profile = () => {
 
                       <div className="space-y-4">
                         <div>
-                          <h3 className="text-sm font-medium text-gray-500">Name</h3>
-                          <p className="mt-1">{user?.name}</p>
+                          <h3 className="text-sm font-medium themed-text-secondary">Name</h3>
+                          <p className="mt-1 themed-text-primary">{user?.name}</p>
                         </div>
 
                         <div>
-                          <h3 className="text-sm font-medium text-gray-500">Email</h3>
-                          <p className="mt-1">{user?.email}</p>
+                          <h3 className="text-sm font-medium themed-text-secondary">Email</h3>
+                          <p className="mt-1 themed-text-primary">{user?.email}</p>
                         </div>
 
                         <div>
-                          <h3 className="text-sm font-medium text-gray-500">Bio</h3>
-                          <p className="mt-1">{user?.bio || 'No bio provided'}</p>
+                          <h3 className="text-sm font-medium themed-text-secondary">Bio</h3>
+                          <p className="mt-1 themed-text-primary">{user?.bio || 'No bio provided'}</p>
                         </div>
 
                         <div>
-                          <h3 className="text-sm font-medium text-gray-500">Account Type</h3>
-                          <p className="mt-1 capitalize">{user?.role || 'user'}</p>
+                          <h3 className="text-sm font-medium themed-text-secondary">Account Type</h3>
+                          <p className="mt-1 capitalize themed-text-primary">
+                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user?.isAdmin ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}`}>
+                              {user?.isAdmin ? 'Administrator' : user?.role || 'Reader'}
+                            </span>
+                          </p>
                         </div>
 
                         <div>
-                          <h3 className="text-sm font-medium text-gray-500">Member Since</h3>
-                          <p className="mt-1">
+                          <h3 className="text-sm font-medium themed-text-secondary">Member Since</h3>
+                          <p className="mt-1 themed-text-primary">
                             {user?.createdAt
                               ? new Date(user.createdAt).toLocaleDateString('en-US', {
                                   year: 'numeric',
@@ -197,27 +211,32 @@ const Profile = () => {
                       </div>
                     </div>
 
-                    <div className="border-t border-gray-200 pt-6">
-                      <h2 className="text-xl font-bold mb-4">Reading Stats</h2>
+                    <div className="border-t themed-border pt-6">
+                      <h2 className="text-xl font-bold themed-text-primary mb-4">Reading Stats</h2>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="bg-gray-50 p-4 rounded-md">
-                          <div className="text-sm text-gray-500">Novels</div>
-                          <div className="text-2xl font-bold">{user?.stats?.totalNovels || 0}</div>
+                        <div className="themed-bg-secondary p-4 rounded-md">
+                          <div className="text-sm themed-text-secondary">Novels</div>
+                          <div className="text-2xl font-bold themed-text-primary">{user?.stats?.totalNovels || 0}</div>
                         </div>
 
-                        <div className="bg-gray-50 p-4 rounded-md">
-                          <div className="text-sm text-gray-500">Reading Time</div>
-                          <div className="text-2xl font-bold">
+                        <div className="themed-bg-secondary p-4 rounded-md">
+                          <div className="text-sm themed-text-secondary">Reading Time</div>
+                          <div className="text-2xl font-bold themed-text-primary">
                             {(user?.stats?.totalReadingTime || user?.readingStats?.totalReadingTime)
                               ? `${Math.floor((user?.stats?.totalReadingTime || user?.readingStats?.totalReadingTime) / 60)}h ${(user?.stats?.totalReadingTime || user?.readingStats?.totalReadingTime) % 60}m`
                               : '0h 0m'}
                           </div>
                         </div>
 
-                        <div className="bg-gray-50 p-4 rounded-md">
-                          <div className="text-sm text-gray-500">Images Generated</div>
-                          <div className="text-2xl font-bold">{user?.stats?.totalImagesGenerated || user?.readingStats?.imagesGenerated || 0}</div>
+                        <div className="themed-bg-secondary p-4 rounded-md">
+                          <div className="text-sm themed-text-secondary">Images Generated</div>
+                          <div className="text-2xl font-bold themed-text-primary">{user?.stats?.totalImagesGenerated || user?.readingStats?.imagesGenerated || 0}</div>
                         </div>
+                      </div>
+                      <div className="mt-4 text-center">
+                        <Link to="/stats" className="text-sm font-medium text-blue-600 hover:text-blue-500 transition-colors duration-200">
+                          View detailed statistics →
+                        </Link>
                       </div>
                     </div>
                   </div>
@@ -225,7 +244,7 @@ const Profile = () => {
                   <form onSubmit={handleSubmit}>
                     <div className="space-y-4">
                       <div>
-                        <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                        <label htmlFor="name" className="block text-sm font-medium themed-text-primary mb-1">
                           Name
                         </label>
                         <input
@@ -233,13 +252,13 @@ const Profile = () => {
                           id="name"
                           value={name}
                           onChange={(e) => setName(e.target.value)}
-                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          className="mt-1 block w-full px-3 py-2 border themed-border rounded-md shadow-sm themed-bg-secondary themed-text-primary focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                           required
                         />
                       </div>
 
                       <div>
-                        <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                        <label htmlFor="email" className="block text-sm font-medium themed-text-primary mb-1">
                           Email
                         </label>
                         <input
@@ -247,13 +266,13 @@ const Profile = () => {
                           id="email"
                           value={email}
                           disabled
-                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100"
+                          className="mt-1 block w-full px-3 py-2 border themed-border rounded-md shadow-sm themed-bg-secondary opacity-75"
                         />
-                        <p className="mt-1 text-sm text-gray-500">Email cannot be changed</p>
+                        <p className="mt-1 text-sm themed-text-secondary">Email cannot be changed</p>
                       </div>
 
                       <div>
-                        <label htmlFor="bio" className="block text-sm font-medium text-gray-700">
+                        <label htmlFor="bio" className="block text-sm font-medium themed-text-primary mb-1">
                           Bio
                         </label>
                         <textarea
@@ -261,7 +280,8 @@ const Profile = () => {
                           value={bio}
                           onChange={(e) => setBio(e.target.value)}
                           rows="4"
-                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          className="mt-1 block w-full px-3 py-2 border themed-border rounded-md shadow-sm themed-bg-secondary themed-text-primary focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          placeholder="Tell us about yourself..."
                         ></textarea>
                       </div>
                     </div>
@@ -274,16 +294,24 @@ const Profile = () => {
                           setName(user?.name || '');
                           setBio(user?.bio || '');
                         }}
-                        className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                        className="px-4 py-2 border themed-border rounded-md themed-text-primary hover:themed-bg-secondary transition-colors duration-200"
                       >
                         Cancel
                       </button>
                       <button
                         type="submit"
-                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 flex items-center"
                         disabled={loading}
                       >
-                        {loading ? 'Saving...' : 'Save Changes'}
+                        {loading ? (
+                          <>
+                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Saving...
+                          </>
+                        ) : 'Save Changes'}
                       </button>
                     </div>
                   </form>
@@ -296,7 +324,10 @@ const Profile = () => {
         </div>
 
         <div className="text-center">
-          <Link to="/bookshelf" className="text-blue-600 hover:underline">
+          <Link to="/bookshelf" className="text-blue-600 hover:text-blue-500 transition-colors duration-200 flex items-center justify-center">
+            <svg className="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+            </svg>
             Back to Bookshelf
           </Link>
         </div>

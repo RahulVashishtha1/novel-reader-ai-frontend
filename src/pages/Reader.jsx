@@ -866,9 +866,18 @@ const Reader = () => {
                   <div className="mt-4 flex justify-center space-x-2">
                     <button
                       onClick={handleGenerateImage}
-                      className="bg-blue-600 text-white py-1 px-3 text-sm rounded-md hover:bg-blue-700 transition flex items-center"
+                      disabled={generatingImage}
+                      className={`text-white py-1 px-3 text-sm rounded-md transition flex items-center ${generatingImage ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
                     >
-                      <span className="mr-1">🔄</span> Regenerate
+                      {generatingImage ? (
+                        <>
+                          <span className="mr-1 animate-spin">⏳</span> Regenerating...
+                        </>
+                      ) : (
+                        <>
+                          <span className="mr-1">🔄</span> Regenerate
+                        </>
+                      )}
                     </button>
                   </div>
                 </div>
@@ -888,7 +897,8 @@ const Reader = () => {
                       </div>
                       <button
                         onClick={handleGenerateImage}
-                        className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition"
+                        disabled={generatingImage}
+                        className={`text-white py-2 px-4 rounded-md transition ${generatingImage ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
                       >
                         Generate Image
                       </button>
