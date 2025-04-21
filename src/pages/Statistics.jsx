@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { getUserStats } from '../features/users/userSlice';
+import { getUserStats, resetReadingStats } from '../features/users/userSlice';
 import { Link } from 'react-router-dom';
 import { formatReadingTime } from '../utils/formatters';
 import { Bar, Pie } from 'react-chartjs-2';
@@ -29,6 +29,20 @@ ChartJS.register(
 const Statistics = () => {
   const { stats, novelsWithProgress, loading, error } = useSelector((state) => state.users);
   const dispatch = useDispatch();
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+
+  const handleResetStats = () => {
+    dispatch(resetReadingStats())
+      .unwrap()
+      .then(() => {
+        setShowResetConfirm(false);
+        // Refresh stats
+        dispatch(getUserStats());
+      })
+      .catch((error) => {
+        console.error('Failed to reset stats:', error);
+      });
+  };
 
   useEffect(() => {
     dispatch(getUserStats());
@@ -41,24 +55,25 @@ const Statistics = () => {
       {
         label: 'Reading Progress (%)',
         data: novelsWithProgress.map((novel) => novel.progress),
-        backgroundColor: 'rgba(54, 162, 235, 0.6)',
-        borderColor: 'rgba(54, 162, 235, 1)',
+        backgroundColor: 'rgba(59, 130, 246, 0.6)', // Tailwind blue-500
+        borderColor: 'rgba(37, 99, 235, 1)', // Tailwind blue-600
         borderWidth: 1,
       },
     ],
   };
+
+  // Count completed novels from the actual novel data
+  const completedNovels = novelsWithProgress.filter(novel => novel.completed).length;
+  const inProgressNovels = novelsWithProgress.length - completedNovels;
 
   // Prepare data for completion pie chart
   const completionData = {
     labels: ['Completed', 'In Progress'],
     datasets: [
       {
-        data: [
-          stats?.novelsCompleted || 0,
-          (novelsWithProgress.length || 0) - (stats?.novelsCompleted || 0),
-        ],
-        backgroundColor: ['rgba(75, 192, 192, 0.6)', 'rgba(255, 159, 64, 0.6)'],
-        borderColor: ['rgba(75, 192, 192, 1)', 'rgba(255, 159, 64, 1)'],
+        data: [completedNovels, inProgressNovels],
+        backgroundColor: ['rgba(34, 197, 94, 0.6)', 'rgba(59, 130, 246, 0.6)'], // green-500, blue-500
+        borderColor: ['rgba(22, 163, 74, 1)', 'rgba(37, 99, 235, 1)'], // green-600, blue-600
         borderWidth: 1,
       },
     ],
@@ -67,7 +82,15 @@ const Statistics = () => {
   return (
     <div className="min-h-screen themed-bg-secondary py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold themed-text-primary mb-8">Reading Statistics</h1>
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold themed-text-primary">Reading Statistics</h1>
+          <button
+            onClick={() => setShowResetConfirm(true)}
+            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors"
+          >
+            Reset Statistics
+          </button>
+        </div>
 
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
@@ -249,9 +272,9 @@ const Statistics = () => {
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="w-full bg-gray-200 rounded-full h-2.5 w-32">
+                            <div className="w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
                               <div
-                                className="bg-blue-600 h-2.5 rounded-full"
+                                className="themed-accent-bg h-2.5 rounded-full"
                                 style={{ width: `${novel.progress}%` }}
                               ></div>
                             </div>
@@ -268,8 +291,8 @@ const Statistics = () => {
                             <span
                               className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                                 novel.completed
-                                  ? 'bg-green-100 text-green-800'
-                                  : 'bg-yellow-100 text-yellow-800'
+                                  ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100'
+                                  : 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100'
                               }`}
                             >
                               {novel.completed ? 'Completed' : 'In Progress'}
@@ -278,7 +301,7 @@ const Statistics = () => {
                           <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <Link
                               to={`/reader/${novel.id}`}
-                              className="text-blue-600 hover:text-blue-900"
+                              className="themed-accent-text hover:opacity-80 transition-opacity"
                             >
                               {novel.lastReadPage > 1 ? 'Continue' : 'Start'}
                             </Link>
@@ -292,7 +315,7 @@ const Statistics = () => {
                     <p className="mb-4">You haven't added any novels yet.</p>
                     <Link
                       to="/bookshelf"
-                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white themed-accent-bg hover:opacity-90 transition-opacity"
                     >
                       Go to Bookshelf
                     </Link>
@@ -303,6 +326,30 @@ const Statistics = () => {
           </div>
         )}
       </div>
+
+      {/* Reset Confirmation Modal */}
+      {showResetConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="themed-bg-primary themed-text-primary rounded-lg shadow-lg p-6 max-w-md w-full">
+            <h2 className="text-xl font-bold mb-4">Reset Statistics</h2>
+            <p className="mb-6">Are you sure you want to reset all your reading statistics? This action cannot be undone.</p>
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={() => setShowResetConfirm(false)}
+                className="px-4 py-2 themed-bg-secondary themed-text-primary rounded-md hover:opacity-80 transition-opacity"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleResetStats}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors"
+              >
+                Reset
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

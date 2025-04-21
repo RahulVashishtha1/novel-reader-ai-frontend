@@ -38,6 +38,18 @@ export const updateReadingStats = createAsyncThunk(
   }
 );
 
+export const resetReadingStats = createAsyncThunk(
+  'users/resetStats',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await userAPI.resetStats();
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data.message || 'Failed to reset stats');
+    }
+  }
+);
+
 export const getAllUsers = createAsyncThunk(
   'users/getAllUsers',
   async (_, { rejectWithValue }) => {
@@ -113,6 +125,19 @@ const userSlice = createSlice({
       // Update reading stats
       .addCase(updateReadingStats.fulfilled, (state, action) => {
         state.stats = action.payload.stats;
+      })
+      // Reset reading stats
+      .addCase(resetReadingStats.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(resetReadingStats.fulfilled, (state, action) => {
+        state.loading = false;
+        state.stats = action.payload.stats;
+      })
+      .addCase(resetReadingStats.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       })
       // Get all users
       .addCase(getAllUsers.pending, (state) => {

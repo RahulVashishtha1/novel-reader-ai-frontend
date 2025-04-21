@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useParams, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useTools } from "../context/ToolsContext";
 import ReadingSettingsPanel from "../components/ReadingSettingsPanel";
@@ -41,13 +41,13 @@ const Reader = () => {
   const [showAddBookmark, setShowAddBookmark] = useState(false);
   const [showAddNote, setShowAddNote] = useState(false);
   const [readingTime, setReadingTime] = useState(0);
-  const [autoPage, setAutoPage] = useState(false);
-  const [autoPageInterval, setAutoPageInterval] = useState(10); // seconds
+  // const [autoPage, setAutoPage] = useState(false);
+  // const [autoPageInterval, setAutoPageInterval] = useState(10); // seconds
   const [readingMode, setReadingMode] = useState("single"); // 'single', 'continuous', 'scroll', or 'paginated'
   const [continuousContent, setContinuousContent] = useState([]);
   const [autoGenerateImage, setAutoGenerateImage] = useState(false);
   const [imageStyle, setImageStyle] = useState('default');
-  const [scrollToPage, setScrollToPage] = useState(false);
+  // const [scrollToPage, setScrollToPage] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showLayoutSettings, setShowLayoutSettings] = useState(false);
   const [showAnnotations, setShowAnnotations] = useState(false);
@@ -57,7 +57,7 @@ const Reader = () => {
   const [jumpToPage, setJumpToPage] = useState("");
 
   const readingTimeRef = useRef(null);
-  const autoPageRef = useRef(null);
+  // const autoPageRef = useRef(null);
 
   const {
     currentNovel,
@@ -70,7 +70,7 @@ const Reader = () => {
   );
   const { preferences } = useSelector((state) => state.preferences);
   const dispatch = useDispatch();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   useEffect(() => {
     if (id) {
@@ -80,10 +80,41 @@ const Reader = () => {
           const lastPage = data.novel.lastReadPage || 1;
           setCurrentPage(lastPage);
 
-          // Handle different reading modes for initial load
-          if (readingMode === "continuous") {
-            loadContinuousContent(lastPage);
+          // Handle different reading modes
+          if (readingMode === "continuous" || readingMode === "scroll") {
+            // Load multiple pages for continuous or scroll mode
+            const pagesToLoad = 5; // Number of pages to load at once
+            const startPage = Math.max(1, lastPage - 2);
+            const endPage = Math.min(data.novel.totalPages, startPage + pagesToLoad - 1);
+
+            // Clear existing content
+            setContinuousContent([]);
+
+            // Load pages sequentially
+            const loadPages = async () => {
+              const newContent = [];
+
+              for (let page = startPage; page <= endPage; page++) {
+                try {
+                  const response = await dispatch(getNovelPage({ id, page })).unwrap();
+                  newContent.push({
+                    page,
+                    content: response.content,
+                    metadata: response.metadata
+                  });
+                } catch (error) {
+                  console.error(`Error loading page ${page}:`, error);
+                }
+              }
+
+              // Sort pages by page number
+              newContent.sort((a, b) => a.page - b.page);
+              setContinuousContent(newContent);
+            };
+
+            loadPages();
           } else {
+            // Single or paginated mode - load just the current page
             dispatch(getNovelPage({ id, page: lastPage }));
           }
 
@@ -108,64 +139,84 @@ const Reader = () => {
       if (readingTimeRef.current) {
         clearInterval(readingTimeRef.current);
       }
-      if (autoPageRef.current) {
-        clearInterval(autoPageRef.current);
-      }
+      // if (autoPageRef.current) {
+      //   clearInterval(autoPageRef.current);
+      // }
       dispatch(clearCurrentNovel());
       dispatch(clearCurrentImages());
       dispatch(clearAnnotations());
     };
-  }, [dispatch, id]);
+  }, [dispatch, id, readingMode, setContinuousContent]);
 
-  // Update reading progress when navigating away
+  // Update reading progress periodically and when navigating away
   useEffect(() => {
-    return () => {
+    // Create a timer to update reading progress every 5 minutes
+    const progressUpdateTimer = setInterval(() => {
       if (currentNovel && readingTime > 0) {
         dispatch(
           updateReadingProgress({
             id: currentNovel._id,
             progressData: {
+              page: currentPage,
+              readingTime,
+            },
+          })
+        );
+        // Don't reset reading time here to keep accumulating
+      }
+    }, 5 * 60 * 1000); // Every 5 minutes
+
+    // Cleanup function to update progress when navigating away
+    return () => {
+      clearInterval(progressUpdateTimer);
+
+      if (currentNovel && readingTime > 0) {
+        dispatch(
+          updateReadingProgress({
+            id: currentNovel._id,
+            progressData: {
+              page: currentPage,
               readingTime,
             },
           })
         );
       }
     };
-  }, [dispatch, currentNovel, readingTime]);
+  }, [dispatch, currentNovel, readingTime, currentPage]);
 
   // Handle auto page turning
-  useEffect(() => {
-    if (autoPage) {
-      autoPageRef.current = setInterval(() => {
-        if (currentPage < (currentNovel?.totalPages || 1)) {
-          handlePageChange(currentPage + 1);
-        } else {
-          // Reached the end of the novel, stop auto-paging
-          setAutoPage(false);
-        }
-      }, autoPageInterval * 1000);
-    } else if (autoPageRef.current) {
-      clearInterval(autoPageRef.current);
-      autoPageRef.current = null;
-    }
-
-    return () => {
-      if (autoPageRef.current) {
-        clearInterval(autoPageRef.current);
-      }
-    };
-  }, [autoPage, autoPageInterval, currentPage, currentNovel?.totalPages]);
+  // useEffect(() => {
+  //   if (autoPage) {
+  //     autoPageRef.current = setInterval(() => {
+  //       if (currentPage < (currentNovel?.totalPages || 1)) {
+  //         handlePageChange(currentPage + 1);
+  //       } else {
+  //         // Reached the end of the novel, stop auto-paging
+  //         setAutoPage(false);
+  //       }
+  //     }, autoPageInterval * 1000);
+  //   } else if (autoPageRef.current) {
+  //     clearInterval(autoPageRef.current);
+  //     autoPageRef.current = null;
+  //   }
+  //
+  //   return () => {
+  //     if (autoPageRef.current) {
+  //       clearInterval(autoPageRef.current);
+  //     }
+  //   };
+  // }, [autoPage, autoPageInterval, currentPage, currentNovel?.totalPages, handlePageChange]);
 
   // Handle scroll to page functionality
-  useEffect(() => {
-    if (scrollToPage && !loading) {
-      // Scroll to the top of the content area
-      const contentElement = document.getElementById("novel-content");
-      if (contentElement) {
-        contentElement.scrollIntoView({ behavior: "smooth" });
-      }
-    }
-  }, [scrollToPage, currentPage, loading]);
+  // useEffect(() => {
+  //   if (scrollToPage && !loading) {
+  //     // Scroll to the top of the content area
+  //     const contentElement = document.getElementById("novel-content");
+  //     if (contentElement) {
+  //       contentElement.scrollIntoView({ behavior: "smooth" });
+  //     }
+  //   }
+  // }, [scrollToPage, currentPage, loading]);
 
   // Handle auto image generation
   useEffect(() => {
@@ -192,7 +243,7 @@ const Reader = () => {
     dispatch,
   ]);
 
-  const handlePageChange = (newPage) => {
+  const handlePageChange = useCallback((newPage) => {
     // Ensure newPage is a valid number and within bounds
     const validatedPage = Math.max(
       1,
@@ -207,11 +258,40 @@ const Reader = () => {
     setCurrentPage(validatedPage);
 
     // Handle different reading modes
-    if (readingMode === "continuous") {
-      // In continuous mode, load multiple pages
-      loadContinuousContent(validatedPage);
+    if ((readingMode === "continuous" || readingMode === "scroll") && currentNovel) {
+      // Load multiple pages for continuous or scroll mode
+      const pagesToLoad = 5; // Number of pages to load at once
+      const startPage = Math.max(1, validatedPage - 2);
+      const endPage = Math.min(currentNovel.totalPages, startPage + pagesToLoad - 1);
+
+      // Clear existing content
+      setContinuousContent([]);
+
+      // Load pages sequentially
+      const loadPages = async () => {
+        const newContent = [];
+
+        for (let page = startPage; page <= endPage; page++) {
+          try {
+            const response = await dispatch(getNovelPage({ id, page })).unwrap();
+            newContent.push({
+              page,
+              content: response.content,
+              metadata: response.metadata
+            });
+          } catch (error) {
+            console.error(`Error loading page ${page}:`, error);
+          }
+        }
+
+        // Sort pages by page number
+        newContent.sort((a, b) => a.page - b.page);
+        setContinuousContent(newContent);
+      };
+
+      loadPages();
     } else {
-      // In single page mode, just load the current page
+      // Single or paginated mode - load just the current page
       dispatch(getNovelPage({ id, page: validatedPage }));
     }
 
@@ -243,9 +323,9 @@ const Reader = () => {
           },
         })
       );
-      setReadingTime(0); // Reset reading time after updating
+      // Don't reset reading time to track total reading time more accurately
     }
-  };
+  }, [currentNovel, currentPage, dispatch, id, autoGenerateImage, imageStyle, readingTime, readingMode, setContinuousContent]);
 
   const handleAddBookmark = () => {
     if (currentNovel) {
@@ -279,9 +359,9 @@ const Reader = () => {
     }
   };
 
-  const handleGoToBookshelf = () => {
-    navigate("/bookshelf");
-  };
+  // const handleGoToBookshelf = () => {
+  //   navigate("/bookshelf");
+  // };
 
   const handleGenerateImage = () => {
     if (currentNovel) {
@@ -295,77 +375,74 @@ const Reader = () => {
     }
   };
 
-  const handleAutoPageIntervalChange = (e) => {
-    const value = parseInt(e.target.value);
-    if (!isNaN(value) && value > 0) {
-      setAutoPageInterval(value);
-    }
-  };
+  // const handleAutoPageIntervalChange = (e) => {
+  //   const value = parseInt(e.target.value);
+  //   if (!isNaN(value) && value > 0) {
+  //     setAutoPageInterval(value);
+  //   }
+  // };
 
-  const toggleAutoPage = () => {
-    setAutoPage(!autoPage);
-  };
+  // const toggleAutoPage = () => {
+  //   setAutoPage(!autoPage);
+  // };
 
   const toggleAutoGenerateImage = () => {
     setAutoGenerateImage(!autoGenerateImage);
   };
 
   // Set reading mode
-  const setReaderMode = (mode) => {
+  const setReaderMode = useCallback((mode) => {
     if (mode === readingMode) return;
 
     setReadingMode(mode);
 
-    // If switching to continuous or scroll mode, load multiple pages
-    if ((mode === "continuous" || mode === "scroll") && currentNovel) {
-      loadContinuousContent(currentPage);
-    } else {
-      // If switching to single or paginated mode, clear continuous content
+    // If switching to single or paginated mode, clear continuous content
+    if (mode === "single" || mode === "paginated") {
       setContinuousContent([]);
+    } else if ((mode === "continuous" || mode === "scroll") && currentNovel) {
+      // Load multiple pages for continuous or scroll mode
+      const pagesToLoad = 5; // Number of pages to load at once
+      const startPage = Math.max(1, currentPage - 2);
+      const endPage = Math.min(currentNovel.totalPages, startPage + pagesToLoad - 1);
+
+      // Clear existing content
+      setContinuousContent([]);
+
+      // Load pages sequentially
+      const loadPages = async () => {
+        const newContent = [];
+
+        for (let page = startPage; page <= endPage; page++) {
+          try {
+            const response = await dispatch(getNovelPage({ id, page })).unwrap();
+            newContent.push({
+              page,
+              content: response.content,
+              metadata: response.metadata
+            });
+          } catch (error) {
+            console.error(`Error loading page ${page}:`, error);
+          }
+        }
+
+        // Sort pages by page number
+        newContent.sort((a, b) => a.page - b.page);
+        setContinuousContent(newContent);
+      };
+
+      loadPages();
     }
-  };
+  }, [readingMode, setContinuousContent, currentPage, currentNovel, dispatch, id]);
 
   // Legacy toggle function for backward compatibility
-  const toggleReadingMode = () => {
-    const newMode = readingMode === "single" ? "continuous" : "single";
-    setReaderMode(newMode);
-  };
+  // const toggleReadingMode = useCallback(() => {
+  //   const newMode = readingMode === "single" ? "continuous" : "single";
+  //   setReaderMode(newMode);
+  // }, [readingMode, setReaderMode]);
 
-  // Function to load multiple pages for continuous mode
-  const loadContinuousContent = async (startPage) => {
-    if (!currentNovel) return;
-
-    // Clear existing continuous content
-    setContinuousContent([]);
-
-    // Determine how many pages to load (current page + 2 more)
-    const pagesToLoad = 3;
-    const endPage = Math.min(
-      startPage + pagesToLoad - 1,
-      currentNovel.totalPages
-    );
-
-    // Load each page and add to continuous content
-    const contentArray = [];
-    for (let page = startPage; page <= endPage; page++) {
-      try {
-        const response = await dispatch(getNovelPage({ id, page })).unwrap();
-        contentArray.push({
-          page,
-          content: response.content,
-          metadata: response.metadata || null,
-        });
-      } catch (error) {
-        console.error(`Error loading page ${page}:`, error);
-      }
-    }
-
-    setContinuousContent(contentArray);
-  };
-
-  const toggleScrollToPage = () => {
-    setScrollToPage(!scrollToPage);
-  };
+  // const toggleScrollToPage = () => {
+  //   setScrollToPage(!scrollToPage);
+  // };
 
   // Handle sharing a passage
   const handleSharePassage = () => {
@@ -376,8 +453,8 @@ const Reader = () => {
             ?.content || pageData.content
         : pageData.content;
 
-    // Get the current image ID if available
-    const currentImage = currentImages.length > 0 ? currentImages[0] : null;
+    // Get the current image ID if available (for future use)
+    // const currentImage = currentImages.length > 0 ? currentImages[0] : null;
 
     setSelectedPassage(content);
     setShowSharePassage(true);
@@ -785,10 +862,10 @@ const Reader = () => {
               ${preferences?.imagePosition === "bottom" ? "w-full" : "w-full"}
               ${
                 preferences?.imageSize === "small"
-                  ? "md:w-1/6"
+                  ? "md:w-[16.666%]"
                   : preferences?.imageSize === "large"
-                  ? "md:w-1/4"
-                  : "md:w-1/5"
+                  ? "md:w-[25%]"
+                  : "md:w-[20%]"
               }
               ${
                 preferences?.layout === "compact"
@@ -804,7 +881,10 @@ const Reader = () => {
                     ? "250px"
                     : "calc(100vh - 160px)",
                 display: "flex",
-                flexDirection: "column"
+                flexDirection: "column",
+                width: preferences?.imagePosition === "bottom" ? "100%" :
+                  preferences?.imageSize === "small" ? "16.666%" :
+                  preferences?.imageSize === "large" ? "25%" : "20%"
               }}
             >
               <div className="flex justify-between items-center mb-2">
@@ -838,76 +918,83 @@ const Reader = () => {
                 </select>
               </div>
 
-              {currentImages.length > 0 ? (
-                <div className="flex-grow flex flex-col items-center justify-center">
-                  <div className="relative w-full">
-                    <img
-                      src={`http://localhost:5000/uploads/${currentImages[0].imageUrl}`}
-                      alt={`Generated for page ${currentPage}`}
-                      className="max-w-full max-h-[55vh] object-contain rounded-md mx-auto"
-                      onError={(e) => {
-                        console.error('Image failed to load:', currentImages[0]);
-                        e.target.onerror = null; // Prevent infinite loop
-                        // Use a data URI for the fallback image instead of an external URL
-                        e.target.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22400%22%20height%3D%22300%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%22400%22%20height%3D%22300%22%20fill%3D%22%233498db%22%2F%3E%3Ctext%20x%3D%22100%22%20y%3D%22150%22%20font-family%3D%22Arial%22%20font-size%3D%2220%22%20fill%3D%22white%22%3EImage%20Not%20Available%3C%2Ftext%3E%3C%2Fsvg%3E';
-                      }}
-                    />
-                    <div className="absolute bottom-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
-                      {currentImages[0].style || 'default'} style
-                      {currentImages[0].generationMethod && (
-                        <span className="ml-1 text-xs opacity-75"> • {currentImages[0].generationMethod}</span>
+              <div className="flex-grow flex flex-col items-center justify-center w-full">
+                {currentImages.length > 0 ? (
+                  <>
+                    <div className="relative w-full flex items-center justify-center">
+                      <img
+                        src={`http://localhost:5000/uploads/${currentImages[0].imageUrl}`}
+                        alt={`Generated for page ${currentPage}`}
+                        className="max-w-full max-h-[55vh] object-contain rounded-md mx-auto"
+                        onError={(e) => {
+                          console.error('Image failed to load:', currentImages[0]);
+                          e.target.onerror = null; // Prevent infinite loop
+                          // Use a data URI for the fallback image instead of an external URL
+                          e.target.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22400%22%20height%3D%22300%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%22400%22%20height%3D%22300%22%20fill%3D%22%233498db%22%2F%3E%3Ctext%20x%3D%22100%22%20y%3D%22150%22%20font-family%3D%22Arial%22%20font-size%3D%2220%22%20fill%3D%22white%22%3EImage%20Not%20Available%3C%2Ftext%3E%3C%2Fsvg%3E';
+                        }}
+                      />
+                      <div className="absolute bottom-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                        {currentImages[0].style || 'default'} style
+                        {currentImages[0].generationMethod && (
+                          <span className="ml-1 text-xs opacity-75"> • {currentImages[0].generationMethod}</span>
+                        )}
+                      </div>
+                      {currentImages[0].error && (
+                        <div className="absolute top-2 left-2 bg-red-500 bg-opacity-70 text-white text-xs px-2 py-1 rounded">
+                          Error: {currentImages[0].error}
+                        </div>
                       )}
                     </div>
-                    {currentImages[0].error && (
-                      <div className="absolute top-2 left-2 bg-red-500 bg-opacity-70 text-white text-xs px-2 py-1 rounded">
-                        Error: {currentImages[0].error}
-                      </div>
-                    )}
-                  </div>
 
-                  <div className="mt-1 mb-2 flex justify-center relative z-10">
-                    <button
-                      onClick={handleGenerateImage}
-                      disabled={generatingImage}
-                      className={`text-white py-1 px-3 text-sm rounded-md transition flex items-center max-w-full ${generatingImage ? 'bg-blue-400 cursor-not-allowed' : 'themed-accent-bg hover:bg-blue-700'}`}
-                    >
-                      {generatingImage ? (
-                        <>
-                          <span className="mr-1 animate-spin">⏳</span> <span className="truncate">Regenerating...</span>
-                        </>
-                      ) : (
-                        <>
-                          <span className="mr-1">🔄</span> <span className="truncate">Regenerate</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex-grow flex flex-col items-center justify-center">
-                  {generatingImage ? (
-                    <div className="text-center">
-                      <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 themed-accent-border mx-auto mb-2"></div>
-                      <div className="themed-text-primary">Generating image...</div>
-                      <div className="text-xs themed-text-secondary mt-1">This may take a few moments</div>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="themed-text-primary mb-4 text-center">
-                        <div className="text-5xl mb-2">🖼️</div>
-                        <div>No image generated for this page</div>
-                      </div>
+                    <div className="mt-1 mb-2 flex justify-center relative z-10">
                       <button
                         onClick={handleGenerateImage}
                         disabled={generatingImage}
-                        className={`text-white py-2 px-4 rounded-md transition ${generatingImage ? 'bg-blue-400 cursor-not-allowed' : 'themed-accent-bg hover:bg-blue-700'}`}
+                        className={`text-white py-1 px-3 text-sm rounded-md transition flex items-center max-w-full ${generatingImage ? 'bg-blue-400 cursor-not-allowed' : 'themed-accent-bg hover:bg-blue-700'}`}
                       >
-                        Generate Image
+                        {generatingImage ? (
+                          <>
+                            <span className="mr-1 animate-spin">⏳</span> <span className="truncate">Regenerating...</span>
+                          </>
+                        ) : (
+                          <>
+                            <span className="mr-1">🔄</span> <span className="truncate">Regenerate</span>
+                          </>
+                        )}
                       </button>
-                    </>
-                  )}
-                </div>
-              )}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-full flex items-center justify-center min-h-[200px]">
+                      {generatingImage ? (
+                        <div className="text-center">
+                          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 themed-accent-border mx-auto mb-2"></div>
+                          <div className="themed-text-primary">Generating image...</div>
+                          <div className="text-xs themed-text-secondary mt-1">This may take a few moments</div>
+                        </div>
+                      ) : (
+                        <div className="themed-text-primary text-center">
+                          <div className="text-5xl mb-2">🖼️</div>
+                          <div>No image generated for this page</div>
+                        </div>
+                      )}
+                    </div>
+
+                    {!generatingImage && (
+                      <div className="mt-1 mb-2 flex justify-center relative z-10">
+                        <button
+                          onClick={handleGenerateImage}
+                          disabled={generatingImage}
+                          className="text-white py-2 px-4 rounded-md transition themed-accent-bg hover:bg-blue-700"
+                        >
+                          Generate Image
+                        </button>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
           )}
         </div>

@@ -37,6 +37,7 @@ export const userAPI = {
   updateProfile: (userData) => api.patch('/users/profile', userData),
   getStats: () => api.get('/users/stats'),
   updateStats: (statsData) => api.patch('/users/stats', statsData),
+  resetStats: () => api.post('/users/stats/reset'),
   getReadingPreferences: () => api.get('/users/preferences'),
   updateReadingPreferences: (preferencesData) => api.patch('/users/preferences', preferencesData),
   getAllUsers: () => api.get('/users/all'),

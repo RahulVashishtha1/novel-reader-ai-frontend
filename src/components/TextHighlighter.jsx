@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   createAnnotation,
@@ -19,7 +19,7 @@ const TextHighlighter = ({ content, novelId, page, isHtml = false }) => {
   const [showNoteInput, setShowNoteInput] = useState(false);
   const [noteText, setNoteText] = useState('');
   const [selectedColor, setSelectedColor] = useState('#ffff00'); // Default yellow
-  const [selectedCategory, setSelectedCategory] = useState('highlight');
+  const [selectedCategory] = useState('highlight');
 
   const contentRef = useRef(null);
   const toolbarRef = useRef(null);
@@ -34,59 +34,79 @@ const TextHighlighter = ({ content, novelId, page, isHtml = false }) => {
     { color: '#ffa500', name: 'Orange' },
   ];
 
-  // Available categories
-  const categories = [
-    { value: 'highlight', label: 'Highlight' },
-    { value: 'note', label: 'Note' },
-    { value: 'question', label: 'Question' },
-    { value: 'important', label: 'Important' },
-    { value: 'vocabulary', label: 'Vocabulary' },
-  ];
+  // Available categories - for future implementation
+  // const categories = [
+  //   { value: 'highlight', label: 'Highlight' },
+  //   { value: 'note', label: 'Note' },
+  //   { value: 'question', label: 'Question' },
+  //   { value: 'important', label: 'Important' },
+  //   { value: 'vocabulary', label: 'Vocabulary' },
+  // ];
 
   // Handle text selection
-  const handleTextSelection = () => {
-    const selection = window.getSelection();
+  const handleTextSelection = (event) => {
+    // Use a small timeout to allow the selection to complete
+    setTimeout(() => {
+      const selection = window.getSelection();
 
-    if (selection.toString().trim().length > 0 && contentRef.current) {
-      // Get the selected text
-      const text = selection.toString();
-      setSelectedText(text);
+      if (selection.toString().trim().length > 0 && contentRef.current) {
+        // Get the selected text
+        const text = selection.toString();
+        setSelectedText(text);
 
-      // Get the range
-      const range = selection.getRangeAt(0);
+        // Get the range
+        const range = selection.getRangeAt(0);
 
-      // Calculate offsets relative to the content element
-      const contentElement = contentRef.current;
-      const contentText = contentElement.textContent;
+        // Store the range for later use (to preserve selection)
+        const selectionRange = range.cloneRange();
 
-      // Create a range from the start of the content to the start of the selection
-      const startRange = document.createRange();
-      startRange.setStart(contentElement, 0);
-      startRange.setEnd(range.startContainer, range.startOffset);
+        // Calculate offsets relative to the content element
+        const contentElement = contentRef.current;
 
-      // The length of this range's text is the start offset
-      const startOffset = startRange.toString().length;
+        // Create a range from the start of the content to the start of the selection
+        const startRange = document.createRange();
+        startRange.setStart(contentElement, 0);
+        startRange.setEnd(range.startContainer, range.startOffset);
 
-      // The end offset is the start offset plus the length of the selected text
-      const endOffset = startOffset + text.length;
+        // The length of this range's text is the start offset
+        const startOffset = startRange.toString().length;
 
-      setSelectionRange({ startOffset, endOffset });
+        // The end offset is the start offset plus the length of the selected text
+        const endOffset = startOffset + text.length;
 
-      // Position the toolbar above the selection
-      const rect = range.getBoundingClientRect();
-      setToolbarPosition({
-        top: rect.top - 50, // Position above the selection
-        left: rect.left + (rect.width / 2) - 100, // Center horizontally
-      });
+        setSelectionRange({ startOffset, endOffset, range: selectionRange });
 
-      setShowToolbar(true);
-    } else {
-      // If clicking outside a selection, hide the toolbar
-      if (!toolbarRef.current || !toolbarRef.current.contains(event.target)) {
-        setShowToolbar(false);
-        setShowNoteInput(false);
+        // Position the toolbar above the selection
+        const rect = range.getBoundingClientRect();
+        setToolbarPosition({
+          top: rect.top - 50, // Position above the selection
+          left: rect.left + (rect.width / 2) - 100, // Center horizontally
+        });
+
+        // Add a temporary highlight to the selection
+        const tempHighlight = document.createElement('span');
+        tempHighlight.className = 'temp-highlight';
+        tempHighlight.style.backgroundColor = 'rgba(255, 255, 0, 0.3)';
+        tempHighlight.style.position = 'absolute';
+        tempHighlight.style.pointerEvents = 'none';
+        tempHighlight.style.top = rect.top + 'px';
+        tempHighlight.style.left = rect.left + 'px';
+        tempHighlight.style.width = rect.width + 'px';
+        tempHighlight.style.height = rect.height + 'px';
+        document.body.appendChild(tempHighlight);
+
+        setShowToolbar(true);
+      } else {
+        // If clicking outside a selection, hide the toolbar
+        if (!toolbarRef.current || !toolbarRef.current.contains(event.target)) {
+          setShowToolbar(false);
+          setShowNoteInput(false);
+
+          // Remove any temporary highlights
+          document.querySelectorAll('.temp-highlight').forEach(el => el.remove());
+        }
       }
-    }
+    }, 10); // Small delay to ensure selection is complete
   };
 
   // Handle highlighting text
@@ -105,17 +125,32 @@ const TextHighlighter = ({ content, novelId, page, isHtml = false }) => {
 
       dispatch(createAnnotation({ novelId, annotationData }));
 
-      // Clear selection and hide toolbar
-      window.getSelection().removeAllRanges();
-      setShowToolbar(false);
-      setSelectedText('');
-      setSelectionRange(null);
+      // Keep the selection visible for a moment before clearing
+      setTimeout(() => {
+        // Clear selection and hide toolbar
+        window.getSelection().removeAllRanges();
+        setShowToolbar(false);
+        setSelectedText('');
+        setSelectionRange(null);
+
+        // Remove any temporary highlights
+        document.querySelectorAll('.temp-highlight').forEach(el => el.remove());
+      }, 500); // Delay to keep selection visible
     }
   };
 
   // Handle adding a note
   const handleAddNote = () => {
     setShowNoteInput(true);
+    // Focus the textarea after a short delay to ensure it's rendered
+    setTimeout(() => {
+      if (noteInputRef.current) {
+        const textarea = noteInputRef.current.querySelector('textarea');
+        if (textarea) {
+          textarea.focus();
+        }
+      }
+    }, 50);
   };
 
   // Handle saving a note
@@ -135,13 +170,19 @@ const TextHighlighter = ({ content, novelId, page, isHtml = false }) => {
 
       dispatch(createAnnotation({ novelId, annotationData }));
 
-      // Clear selection and hide toolbar
-      window.getSelection().removeAllRanges();
-      setShowToolbar(false);
-      setShowNoteInput(false);
-      setNoteText('');
-      setSelectedText('');
-      setSelectionRange(null);
+      // Keep the selection visible for a moment before clearing
+      setTimeout(() => {
+        // Clear selection and hide toolbar
+        window.getSelection().removeAllRanges();
+        setShowToolbar(false);
+        setShowNoteInput(false);
+        setNoteText('');
+        setSelectedText('');
+        setSelectionRange(null);
+
+        // Remove any temporary highlights
+        document.querySelectorAll('.temp-highlight').forEach(el => el.remove());
+      }, 500); // Delay to keep selection visible
     }
   };
 
@@ -173,7 +214,7 @@ const TextHighlighter = ({ content, novelId, page, isHtml = false }) => {
   };
 
   // Handle clicking on an existing annotation
-  const handleAnnotationClick = (annotation, event) => {
+  const handleAnnotationClick = useCallback((annotation, event) => {
     event.stopPropagation();
     dispatch(setCurrentAnnotation(annotation));
 
@@ -190,7 +231,7 @@ const TextHighlighter = ({ content, novelId, page, isHtml = false }) => {
       setNoteText(annotation.note);
       setShowNoteInput(true);
     }
-  };
+  }, [dispatch]);
 
   // Close toolbar when clicking outside
   useEffect(() => {
@@ -203,6 +244,9 @@ const TextHighlighter = ({ content, novelId, page, isHtml = false }) => {
         setShowToolbar(false);
         setShowNoteInput(false);
         dispatch(clearCurrentAnnotation());
+
+        // Remove any temporary highlights
+        document.querySelectorAll('.temp-highlight').forEach(el => el.remove());
       }
     };
 
@@ -224,11 +268,101 @@ const TextHighlighter = ({ content, novelId, page, isHtml = false }) => {
     }
 
     // For HTML content, we need a different approach to annotations
-    // This is a simplified implementation - in a production app, you'd want to use a proper HTML parser
     if (isHtml) {
-      // For now, just return the HTML content without annotations
-      // In a real implementation, you'd need to parse the HTML and insert annotations at the right places
-      return content;
+      // Create a temporary div to parse the HTML content
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = content;
+
+      // If there are no annotations, just return the content
+      if (!pageAnnotations || pageAnnotations.length === 0) {
+        return content;
+      }
+
+      // Get all text nodes in the HTML content
+      const textNodes = [];
+      const getTextNodes = (node) => {
+        if (node.nodeType === Node.TEXT_NODE && node.textContent.trim().length > 0) {
+          textNodes.push(node);
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+          Array.from(node.childNodes).forEach(getTextNodes);
+        }
+      };
+
+      getTextNodes(tempDiv);
+
+      // Calculate the total text content
+      let fullText = '';
+      const nodePositions = [];
+
+      textNodes.forEach(node => {
+        nodePositions.push({
+          node,
+          start: fullText.length,
+          end: fullText.length + node.textContent.length
+        });
+        fullText += node.textContent;
+      });
+
+      // Sort annotations by start offset (in reverse order to process from end to start)
+      const sortedAnnotations = [...pageAnnotations].sort((a, b) =>
+        b.textSelection.startOffset - a.textSelection.startOffset
+      );
+
+      // Apply annotations to the text nodes
+      sortedAnnotations.forEach(annotation => {
+        const { startOffset, endOffset } = annotation.textSelection;
+
+        // Find nodes that contain the annotation
+        const affectedNodes = nodePositions.filter(pos =>
+          (startOffset < pos.end && endOffset > pos.start)
+        );
+
+        if (affectedNodes.length === 0) return;
+
+        // Process each affected node
+        affectedNodes.forEach(nodePos => {
+          const node = nodePos.node;
+          const parent = node.parentNode;
+
+          // Calculate the relative positions within this text node
+          const relativeStart = Math.max(0, startOffset - nodePos.start);
+          const relativeEnd = Math.min(node.textContent.length, endOffset - nodePos.start);
+
+          if (relativeStart >= node.textContent.length || relativeEnd <= 0) return;
+
+          // Split the text node into parts
+          const beforeText = node.textContent.substring(0, relativeStart);
+          const highlightedText = node.textContent.substring(relativeStart, relativeEnd);
+          const afterText = node.textContent.substring(relativeEnd);
+
+          // Create new nodes
+          const hasNote = annotation.note && annotation.note.trim().length > 0;
+          const noteIndicator = hasNote ? ' 📝' : '';
+
+          // Replace the text node with the new nodes
+          if (beforeText) {
+            parent.insertBefore(document.createTextNode(beforeText), node);
+          }
+
+          // Create the highlighted span
+          const span = document.createElement('span');
+          span.className = 'annotation';
+          span.setAttribute('data-annotation-id', annotation._id);
+          span.style.backgroundColor = annotation.color;
+          span.style.cursor = 'pointer';
+          span.textContent = highlightedText + noteIndicator;
+          parent.insertBefore(span, node);
+
+          if (afterText) {
+            parent.insertBefore(document.createTextNode(afterText), node);
+          }
+
+          // Remove the original node
+          parent.removeChild(node);
+        });
+      });
+
+      return tempDiv.innerHTML;
     }
 
     // Sort annotations by start offset (in reverse order to process from end to start)
@@ -287,7 +421,7 @@ const TextHighlighter = ({ content, novelId, page, isHtml = false }) => {
     const timeoutId = setTimeout(addAnnotationEventListeners, 100);
 
     return () => clearTimeout(timeoutId);
-  }, [pageAnnotations, content]);
+  }, [pageAnnotations, content, handleAnnotationClick]);
 
   return (
     <div className="relative">
@@ -303,10 +437,10 @@ const TextHighlighter = ({ content, novelId, page, isHtml = false }) => {
       {showToolbar && (
         <div
           ref={toolbarRef}
-          className="absolute z-50 bg-white shadow-lg rounded-md p-2 flex flex-col items-center"
+          className="fixed z-50 themed-bg-primary shadow-lg rounded-md p-2 flex flex-col items-center"
           style={{
-            top: toolbarPosition.top + 'px',
-            left: toolbarPosition.left + 'px',
+            top: Math.max(10, toolbarPosition.top) + 'px',
+            left: Math.max(10, Math.min(window.innerWidth - 220, toolbarPosition.left)) + 'px',
           }}
         >
           {/* Color picker */}
@@ -328,13 +462,13 @@ const TextHighlighter = ({ content, novelId, page, isHtml = false }) => {
               <>
                 <button
                   onClick={handleHighlight}
-                  className="px-2 py-1 bg-blue-600 text-white text-sm rounded"
+                  className="px-2 py-1 themed-accent-bg text-white text-sm rounded hover:bg-blue-700 transition-colors"
                 >
                   Highlight
                 </button>
                 <button
                   onClick={handleAddNote}
-                  className="px-2 py-1 bg-green-600 text-white text-sm rounded"
+                  className="px-2 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors"
                 >
                   Add Note
                 </button>
@@ -344,21 +478,21 @@ const TextHighlighter = ({ content, novelId, page, isHtml = false }) => {
                 {currentAnnotation.note ? (
                   <button
                     onClick={handleAddNote}
-                    className="px-2 py-1 bg-green-600 text-white text-sm rounded"
+                    className="px-2 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors"
                   >
                     Edit Note
                   </button>
                 ) : (
                   <button
                     onClick={handleAddNote}
-                    className="px-2 py-1 bg-green-600 text-white text-sm rounded"
+                    className="px-2 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors"
                   >
                     Add Note
                   </button>
                 )}
                 <button
                   onClick={handleDeleteAnnotation}
-                  className="px-2 py-1 bg-red-600 text-white text-sm rounded"
+                  className="px-2 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition-colors"
                 >
                   Delete
                 </button>
@@ -372,17 +506,17 @@ const TextHighlighter = ({ content, novelId, page, isHtml = false }) => {
       {showNoteInput && (
         <div
           ref={noteInputRef}
-          className="absolute z-50 bg-white shadow-lg rounded-md p-3"
+          className="fixed z-50 themed-bg-primary shadow-lg rounded-md p-3"
           style={{
-            top: (toolbarPosition.top + 70) + 'px',
-            left: (toolbarPosition.left - 50) + 'px',
+            top: Math.max(80, toolbarPosition.top + 70) + 'px',
+            left: Math.max(10, Math.min(window.innerWidth - 310, toolbarPosition.left - 50)) + 'px',
             width: '300px',
           }}
         >
           <textarea
             value={noteText}
             onChange={(e) => setNoteText(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded mb-2"
+            className="w-full p-2 border themed-border rounded mb-2 themed-bg-primary themed-text-primary"
             rows="3"
             placeholder="Enter your note..."
             autoFocus
@@ -390,13 +524,13 @@ const TextHighlighter = ({ content, novelId, page, isHtml = false }) => {
           <div className="flex justify-end space-x-2">
             <button
               onClick={() => setShowNoteInput(false)}
-              className="px-2 py-1 bg-gray-300 text-gray-700 text-sm rounded"
+              className="px-2 py-1 themed-bg-secondary themed-text-primary text-sm rounded hover:opacity-80 transition-opacity"
             >
               Cancel
             </button>
             <button
               onClick={currentAnnotation ? handleUpdateNote : handleSaveNote}
-              className="px-2 py-1 bg-blue-600 text-white text-sm rounded"
+              className="px-2 py-1 themed-accent-bg text-white text-sm rounded hover:bg-blue-700 transition-colors"
             >
               Save
             </button>
