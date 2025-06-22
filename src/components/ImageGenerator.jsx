@@ -17,6 +17,8 @@ const ImageGenerator = ({ novelId, page }) => {
     { id: 'sketch', name: 'Sketch' },
   ];
 
+  const apiBase = import.meta.env.VITE_API_URL.replace(/\/api$/, '');
+
   useEffect(() => {
     if (novelId && page) {
       dispatch(getImagesForPage({ novelId, page }));
@@ -101,7 +103,7 @@ const ImageGenerator = ({ novelId, page }) => {
             {currentImages.map((image) => (
               <div key={image._id} className="border border-gray-200 rounded-md p-2">
                 <img
-                  src={`http://localhost:5000/${image.imageUrl}`}
+                  src={`${apiBase}/${image.imageUrl}`}
                   alt={`Generated for page ${image.page}`}
                   className="w-full h-auto rounded-md"
                 />

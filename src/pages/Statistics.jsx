@@ -30,6 +30,7 @@ const Statistics = () => {
   const { stats, novelsWithProgress, loading, error } = useSelector((state) => state.users);
   const dispatch = useDispatch();
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [showRecalculateConfirm, setShowRecalculateConfirm] = useState(false);
 
   const handleResetStats = () => {
     dispatch(resetReadingStats())
@@ -115,6 +116,9 @@ const Statistics = () => {
                     <dd className="mt-1 text-3xl font-semibold themed-text-primary">
                       {formatReadingTime(stats?.totalReadingTime || 0)}
                     </dd>
+                    <dd className="mt-1 text-sm themed-text-secondary">
+                      {stats?.totalReadingTime > 0 ? `${Math.round(stats.totalReadingTime)} minutes total` : 'No reading time recorded'}
+                    </dd>
                   </dl>
                 </div>
               </div>
@@ -127,6 +131,11 @@ const Statistics = () => {
                     </dt>
                     <dd className="mt-1 text-3xl font-semibold themed-text-primary">
                       {stats?.pagesRead || 0}
+                    </dd>
+                    <dd className="mt-1 text-sm themed-text-secondary">
+                      {novelsWithProgress.length > 0 ?
+                        `Across ${novelsWithProgress.length} ${novelsWithProgress.length === 1 ? 'novel' : 'novels'}` :
+                        'No pages read yet'}
                     </dd>
                   </dl>
                 </div>
@@ -141,6 +150,11 @@ const Statistics = () => {
                     <dd className="mt-1 text-3xl font-semibold themed-text-primary">
                       {stats?.novelsCompleted || 0}
                     </dd>
+                    <dd className="mt-1 text-sm themed-text-secondary">
+                      {novelsWithProgress.length > 0 ?
+                        `${Math.round((stats?.novelsCompleted || 0) / novelsWithProgress.length * 100)}% completion rate` :
+                        'No novels in library'}
+                    </dd>
                   </dl>
                 </div>
               </div>
@@ -154,7 +168,50 @@ const Statistics = () => {
                     <dd className="mt-1 text-3xl font-semibold themed-text-primary">
                       {stats?.imagesGenerated || 0}
                     </dd>
+                    <dd className="mt-1 text-sm themed-text-secondary">
+                      {stats?.pagesRead > 0 ?
+                        `${Math.round((stats?.imagesGenerated || 0) / (stats?.pagesRead || 1) * 100)}% of pages with images` :
+                        'No pages read yet'}
+                    </dd>
                   </dl>
+                </div>
+              </div>
+            </div>
+
+            {/* Additional Stats */}
+            <div className="themed-bg-primary overflow-hidden shadow rounded-lg mb-6">
+              <div className="px-4 py-5 sm:p-6">
+                <h3 className="text-lg font-medium themed-text-primary mb-4">Reading Insights</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="text-sm font-medium themed-text-secondary">Average Reading Speed</h4>
+                    <p className="text-lg themed-text-primary">
+                      {stats?.totalReadingTime > 0 && stats?.pagesRead > 0 ?
+                        `${Math.round(stats.pagesRead / (stats.totalReadingTime / 60))} pages per hour` :
+                        'Not enough data'}
+                    </p>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium themed-text-secondary">Reading Streak</h4>
+                    <p className="text-lg themed-text-primary">
+                      {/* This would require additional backend tracking */}
+                      Coming soon
+                    </p>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium themed-text-secondary">Total Novels</h4>
+                    <p className="text-lg themed-text-primary">
+                      {novelsWithProgress.length}
+                    </p>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium themed-text-secondary">Average Completion</h4>
+                    <p className="text-lg themed-text-primary">
+                      {novelsWithProgress.length > 0 ?
+                        `${Math.round(novelsWithProgress.reduce((acc, novel) => acc + novel.progress, 0) / novelsWithProgress.length)}%` :
+                        'No novels in library'}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -345,6 +402,30 @@ const Statistics = () => {
                 className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors"
               >
                 Reset
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Recalculate Confirmation Modal */}
+      {showRecalculateConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="themed-bg-primary themed-text-primary rounded-lg shadow-lg p-6 max-w-md w-full">
+            <h2 className="text-xl font-bold mb-4">Recalculate Statistics</h2>
+            <p className="mb-6">This will recalculate your reading statistics based on your actual reading progress across all novels. Continue?</p>
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={() => setShowRecalculateConfirm(false)}
+                className="px-4 py-2 themed-bg-secondary themed-text-primary rounded-md hover:opacity-80 transition-opacity"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleRecalculateStats}
+                className="px-4 py-2 themed-accent-bg hover:opacity-90 text-white rounded-md transition-colors"
+              >
+                Recalculate
               </button>
             </div>
           </div>

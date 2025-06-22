@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { sharePassage, generateSocialImage, clearSharedContent } from '../features/sharing/sharingSlice';
 import DOMPurify from 'dompurify';
-import { BACKEND_URL } from '../config';
 
 const SharePassageModal = ({ novelId, page, content, imageId, onClose }) => {
   const dispatch = useDispatch();
@@ -24,7 +23,7 @@ const SharePassageModal = ({ novelId, page, content, imageId, onClose }) => {
     } else {
       // Clean up the path and ensure it's properly formatted
       const cleanPath = currentImage.imageUrl.replace(/\\/g, '/').replace(/^\/+/, '');
-      currentImageUrl = `${BACKEND_URL}/${cleanPath}`;
+      currentImageUrl = `${import.meta.env.VITE_API_URL}/${cleanPath}`;
     }
   }
 
@@ -90,7 +89,8 @@ const SharePassageModal = ({ novelId, page, content, imageId, onClose }) => {
           }
 
           // Make a direct API call to the backend
-          const response = await fetch(`${BACKEND_URL}/api/sharing/preview`, {
+          const apiBase = import.meta.env.VITE_API_URL.replace(/\/api$/, '');
+          const response = await fetch(`${apiBase}/api/sharing/preview`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -108,7 +108,7 @@ const SharePassageModal = ({ novelId, page, content, imageId, onClose }) => {
 
           // Set the preview image URL
           if (data.previewUrl) {
-            setSocialImagePreview(`${BACKEND_URL}/${data.previewUrl}`);
+            setSocialImagePreview(`${apiBase}/${data.previewUrl}`);
           } else if (data.fullUrl) {
             setSocialImagePreview(data.fullUrl);
           } else {
@@ -124,10 +124,6 @@ const SharePassageModal = ({ novelId, page, content, imageId, onClose }) => {
       generatePreview();
     }
   }, [shareStep, selectedText, imageId, novelId, page, currentImage, currentImageUrl]);
-
-
-
-
 
   // Set the social image when shared content is available
   useEffect(() => {

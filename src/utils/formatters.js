@@ -9,8 +9,13 @@ export const formatReadingTime = (minutes) => {
   if (!minutes) return '0 min';
 
   // Handle potentially incorrect large values
+  if (minutes < 0 || !Number.isFinite(minutes) || Number.isNaN(minutes)) {
+    return 'Invalid time';
+  }
+
+  // Cap extremely large values
   if (minutes > 1000000) {
-    return 'Time tracking error';
+    minutes = 1000000; // Cap at ~2 years of reading time
   }
 
   const hours = Math.floor(minutes / 60);

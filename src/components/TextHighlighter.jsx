@@ -20,6 +20,7 @@ const TextHighlighter = ({ content, novelId, page, isHtml = false }) => {
   const [noteText, setNoteText] = useState('');
   const [selectedColor, setSelectedColor] = useState('#ffff00'); // Default yellow
   const [selectedCategory] = useState('highlight');
+  const toolbarHeight = 80; // Approximate height of toolbar for positioning
 
   const contentRef = useRef(null);
   const toolbarRef = useRef(null);
@@ -52,6 +53,16 @@ const TextHighlighter = ({ content, novelId, page, isHtml = false }) => {
       if (selection.toString().trim().length > 0 && contentRef.current) {
         // Get the selected text
         const text = selection.toString();
+
+        // Check if the text contains HTML tags or if we're selecting inside an annotation
+        if (text.includes('<') || text.includes('>') ||
+            event.target.closest('.annotation') ||
+            Array.from(selection.getRangeAt(0).commonAncestorContainer.querySelectorAll('.annotation')).length > 0) {
+          // Don't allow highlighting of already highlighted text or text with HTML tags
+          console.log('Cannot highlight text that contains HTML tags or is already highlighted');
+          return;
+        }
+
         setSelectedText(text);
 
         // Get the range
@@ -76,34 +87,40 @@ const TextHighlighter = ({ content, novelId, page, isHtml = false }) => {
 
         setSelectionRange({ startOffset, endOffset, range: selectionRange });
 
-        // Position the toolbar above the selection
+        // Position the toolbar near the selection with better positioning
         const rect = range.getBoundingClientRect();
+        const viewportWidth = window.innerWidth;
+
+        // Calculate optimal position - prefer below text to avoid covering it
+        const toolbarWidth = 200; // Approximate width of toolbar
+
+        // Position below the selection with padding
+        const topPosition = rect.bottom + 10;
+
+        // Center horizontally but keep within viewport
+        const leftPosition = Math.max(
+          10,
+          Math.min(
+            viewportWidth - toolbarWidth - 10,
+            rect.left + (rect.width / 2) - (toolbarWidth / 2)
+          )
+        );
+
         setToolbarPosition({
-          top: rect.top - 50, // Position above the selection
-          left: rect.left + (rect.width / 2) - 100, // Center horizontally
+          top: topPosition,
+          left: leftPosition,
         });
 
-        // Add a temporary highlight to the selection
-        const tempHighlight = document.createElement('span');
-        tempHighlight.className = 'temp-highlight';
-        tempHighlight.style.backgroundColor = 'rgba(255, 255, 0, 0.3)';
-        tempHighlight.style.position = 'absolute';
-        tempHighlight.style.pointerEvents = 'none';
-        tempHighlight.style.top = rect.top + 'px';
-        tempHighlight.style.left = rect.left + 'px';
-        tempHighlight.style.width = rect.width + 'px';
-        tempHighlight.style.height = rect.height + 'px';
-        document.body.appendChild(tempHighlight);
+        // We're using the browser's default selection for highlighting
+        // This allows for text copying while still showing the toolbar
 
+        // Force show the toolbar
         setShowToolbar(true);
       } else {
         // If clicking outside a selection, hide the toolbar
         if (!toolbarRef.current || !toolbarRef.current.contains(event.target)) {
           setShowToolbar(false);
           setShowNoteInput(false);
-
-          // Remove any temporary highlights
-          document.querySelectorAll('.temp-highlight').forEach(el => el.remove());
         }
       }
     }, 10); // Small delay to ensure selection is complete
@@ -133,8 +150,7 @@ const TextHighlighter = ({ content, novelId, page, isHtml = false }) => {
         setSelectedText('');
         setSelectionRange(null);
 
-        // Remove any temporary highlights
-        document.querySelectorAll('.temp-highlight').forEach(el => el.remove());
+        // Using browser's native selection for highlighting and copying
       }, 500); // Delay to keep selection visible
     }
   };
@@ -180,8 +196,7 @@ const TextHighlighter = ({ content, novelId, page, isHtml = false }) => {
         setSelectedText('');
         setSelectionRange(null);
 
-        // Remove any temporary highlights
-        document.querySelectorAll('.temp-highlight').forEach(el => el.remove());
+        // Using browser's native selection for highlighting and copying
       }, 500); // Delay to keep selection visible
     }
   };
@@ -218,18 +233,42 @@ const TextHighlighter = ({ content, novelId, page, isHtml = false }) => {
     event.stopPropagation();
     dispatch(setCurrentAnnotation(annotation));
 
-    // Position the toolbar near the annotation
+    // Position the toolbar near the annotation with better positioning
     const rect = event.target.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+
+    // Always position below the annotation to avoid covering text
+    const toolbarWidth = 200; // Approximate width of toolbar
+    const topPosition = rect.bottom + 10; // Position below with padding
+
+    // Center horizontally but keep within viewport
+    const leftPosition = Math.max(
+      10,
+      Math.min(
+        viewportWidth - toolbarWidth - 10,
+        rect.left + (rect.width / 2) - (toolbarWidth / 2)
+      )
+    );
+
     setToolbarPosition({
-      top: rect.top - 50,
-      left: rect.left + (rect.width / 2) - 100,
+      top: topPosition,
+      left: leftPosition,
     });
 
     setShowToolbar(true);
 
+    // Always show the note if it exists
     if (annotation.note) {
       setNoteText(annotation.note);
-      setShowNoteInput(true);
+      // Small delay to ensure the toolbar is rendered first
+      setTimeout(() => {
+        setShowNoteInput(true);
+      }, 50);
+    }
+
+    // Set the selected text to show what was highlighted
+    if (annotation.textSelection && annotation.textSelection.selectedText) {
+      setSelectedText(annotation.textSelection.selectedText);
     }
   }, [dispatch]);
 
@@ -245,8 +284,7 @@ const TextHighlighter = ({ content, novelId, page, isHtml = false }) => {
         setShowNoteInput(false);
         dispatch(clearCurrentAnnotation());
 
-        // Remove any temporary highlights
-        document.querySelectorAll('.temp-highlight').forEach(el => el.remove());
+        // Using browser's native selection for highlighting and copying
       }
     };
 
@@ -262,7 +300,7 @@ const TextHighlighter = ({ content, novelId, page, isHtml = false }) => {
       return '';
     }
 
-    // If there are no annotations or if it's HTML content, just return the content
+    // If there are no annotations, just return the content
     if (!pageAnnotations || pageAnnotations.length === 0) {
       return content;
     }
@@ -337,7 +375,6 @@ const TextHighlighter = ({ content, novelId, page, isHtml = false }) => {
 
           // Create new nodes
           const hasNote = annotation.note && annotation.note.trim().length > 0;
-          const noteIndicator = hasNote ? ' 📝' : '';
 
           // Replace the text node with the new nodes
           if (beforeText) {
@@ -350,7 +387,18 @@ const TextHighlighter = ({ content, novelId, page, isHtml = false }) => {
           span.setAttribute('data-annotation-id', annotation._id);
           span.style.backgroundColor = annotation.color;
           span.style.cursor = 'pointer';
-          span.textContent = highlightedText + noteIndicator;
+          span.textContent = highlightedText;
+          if (hasNote) {
+            const noteIcon = document.createElement('small');
+            noteIcon.style.fontSize = '1em';
+            noteIcon.style.opacity = '1';
+            noteIcon.style.marginLeft = '3px';
+            noteIcon.style.color = '#2563eb'; // Blue color for better visibility
+            noteIcon.style.fontWeight = 'bold';
+            noteIcon.textContent = '📝';
+            noteIcon.title = 'This annotation has a note. Click to view.';
+            span.appendChild(noteIcon);
+          }
           parent.insertBefore(span, node);
 
           if (afterText) {
@@ -380,7 +428,7 @@ const TextHighlighter = ({ content, novelId, page, isHtml = false }) => {
       const afterText = contentWithAnnotations.substring(endOffset);
 
       const hasNote = annotation.note && annotation.note.trim().length > 0;
-      const noteIndicator = hasNote ? ' 📝' : '';
+      const noteIndicator = hasNote ? '<small style="font-size: 1em; opacity: 1; margin-left: 3px; color: #2563eb; font-weight: bold;" title="This annotation has a note. Click to view.">📝</small>' : '';
 
       contentWithAnnotations =
         beforeText +
@@ -448,7 +496,7 @@ const TextHighlighter = ({ content, novelId, page, isHtml = false }) => {
             {highlightColors.map((hc) => (
               <button
                 key={hc.color}
-                className="w-6 h-6 rounded-full border border-gray-300"
+                className={`w-6 h-6 rounded-full border ${selectedColor === hc.color ? 'border-blue-500 ring-2 ring-blue-300' : 'border-gray-300'}`}
                 style={{ backgroundColor: hc.color }}
                 title={hc.name}
                 onClick={() => setSelectedColor(hc.color)}
@@ -508,11 +556,20 @@ const TextHighlighter = ({ content, novelId, page, isHtml = false }) => {
           ref={noteInputRef}
           className="fixed z-50 themed-bg-primary shadow-lg rounded-md p-3"
           style={{
-            top: Math.max(80, toolbarPosition.top + 70) + 'px',
-            left: Math.max(10, Math.min(window.innerWidth - 310, toolbarPosition.left - 50)) + 'px',
+            top: (toolbarPosition.top + toolbarHeight + 10) + 'px',
+            left: Math.max(10, Math.min(window.innerWidth - 310, toolbarPosition.left)) + 'px',
             width: '300px',
           }}
         >
+          {/* Show the highlighted text if available */}
+          {selectedText && currentAnnotation && (
+            <div className="mb-2 p-2 border themed-border rounded themed-bg-secondary">
+              <p className="text-xs themed-text-secondary mb-1">Highlighted text:</p>
+              <p className="text-sm themed-text-primary" style={{ backgroundColor: currentAnnotation.color }}>
+                {selectedText}
+              </p>
+            </div>
+          )}
           <textarea
             value={noteText}
             onChange={(e) => setNoteText(e.target.value)}

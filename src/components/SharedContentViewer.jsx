@@ -9,6 +9,8 @@ const SharedContentViewer = () => {
   const { sharedContent, loading, error } = useSelector((state) => state.sharing);
   const { isAuthenticated } = useSelector((state) => state.auth);
   
+  const apiBase = import.meta.env.VITE_API_URL.replace(/\/api$/, '');
+  
   useEffect(() => {
     if (shareId) {
       dispatch(getSharedContent(shareId));
@@ -133,7 +135,7 @@ const SharedContentViewer = () => {
                     <div className="text-sm text-gray-600 mb-1">AI Generated Image</div>
                     <div className="bg-gray-50 p-2 rounded-md border border-gray-200">
                       <img
-                        src={`${process.env.BACKEND_URL || 'http://localhost:5000'}/${sharedContent.imageUrl}`}
+                        src={`${apiBase}/${sharedContent.imageUrl}`}
                         alt="AI generated scene"
                         className="max-w-full rounded"
                       />

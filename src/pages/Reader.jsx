@@ -319,13 +319,14 @@ const Reader = () => {
           id: currentNovel._id,
           progressData: {
             page: validatedPage,
-            readingTime,
+            // Don't send reading time here, it's handled by the activity tracking
+            readingTime: 0,
           },
         })
       );
       // Don't reset reading time to track total reading time more accurately
     }
-  }, [currentNovel, currentPage, dispatch, id, autoGenerateImage, imageStyle, readingTime, readingMode, setContinuousContent]);
+  }, [currentNovel, currentPage, dispatch, id, autoGenerateImage, imageStyle, readingMode, setContinuousContent]);
 
   const handleAddBookmark = () => {
     if (currentNovel) {
@@ -923,7 +924,7 @@ const Reader = () => {
                   <>
                     <div className="relative w-full flex items-center justify-center">
                       <img
-                        src={`http://localhost:5000/uploads/${currentImages[0].imageUrl}`}
+                        src={`${import.meta.env.VITE_API_URL.replace(/\/api$/, '')}/uploads/${currentImages[0].imageUrl}`}
                         alt={`Generated for page ${currentPage}`}
                         className="max-w-full max-h-[55vh] object-contain rounded-md mx-auto"
                         onError={(e) => {

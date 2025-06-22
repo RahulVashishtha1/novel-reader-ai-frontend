@@ -216,21 +216,29 @@ const Profile = () => {
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="themed-bg-secondary p-4 rounded-md">
                           <div className="text-sm themed-text-secondary">Novels</div>
-                          <div className="text-2xl font-bold themed-text-primary">{user?.stats?.totalNovels || 0}</div>
+                          <div className="text-2xl font-bold themed-text-primary">
+                            {user?.stats?.totalNovels || (user?.readingStats ? '?' : 0)}
+                          </div>
                         </div>
 
                         <div className="themed-bg-secondary p-4 rounded-md">
                           <div className="text-sm themed-text-secondary">Reading Time</div>
                           <div className="text-2xl font-bold themed-text-primary">
-                            {(user?.stats?.totalReadingTime || user?.readingStats?.totalReadingTime)
-                              ? `${Math.floor((user?.stats?.totalReadingTime || user?.readingStats?.totalReadingTime) / 60)}h ${(user?.stats?.totalReadingTime || user?.readingStats?.totalReadingTime) % 60}m`
-                              : '0h 0m'}
+                            {(() => {
+                              // Get reading time from the appropriate source
+                              const readingTime = user?.readingStats?.totalReadingTime || user?.stats?.totalReadingTime || 0;
+                              const hours = Math.floor(readingTime / 60);
+                              const minutes = readingTime % 60;
+                              return `${hours}h ${minutes}m`;
+                            })()}
                           </div>
                         </div>
 
                         <div className="themed-bg-secondary p-4 rounded-md">
                           <div className="text-sm themed-text-secondary">Images Generated</div>
-                          <div className="text-2xl font-bold themed-text-primary">{user?.stats?.totalImagesGenerated || user?.readingStats?.imagesGenerated || 0}</div>
+                          <div className="text-2xl font-bold themed-text-primary">
+                            {user?.readingStats?.imagesGenerated || user?.stats?.totalImagesGenerated || 0}
+                          </div>
                         </div>
                       </div>
                       <div className="mt-4 text-center">
