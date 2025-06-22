@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../features/auth/authSlice';
 import { useTools } from '../context/ToolsContext';
 import ThemeToggle from './ThemeToggle';
+import visnovelLogo from '../assets/visnovel_logo_draft1.png';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -27,8 +28,9 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
-            <Link to="/" className="flex-shrink-0 text-xl font-bold">
-              📖 VisNovel
+            <Link to="/" className="flex-shrink-0 flex items-center">
+              <img src={visnovelLogo} alt="VisNovel Logo" className="h-8 w-auto mr-2" />
+              <span className="text-xl font-bold">VisNovel</span>
             </Link>
             {isAuthenticated && (
               <div className="hidden md:block ml-10">
