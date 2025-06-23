@@ -924,7 +924,7 @@ const Reader = () => {
                   <>
                     <div className="relative w-full flex items-center justify-center">
                       <img
-                        src={`${import.meta.env.VITE_API_URL.replace(/\/api$/, '')}/uploads/${currentImages[0].imageUrl}`}
+                        src={currentImages[0].imageUrl}
                         alt={`Generated for page ${currentPage}`}
                         className="max-w-full max-h-[55vh] object-contain rounded-md mx-auto"
                         onError={(e) => {
