@@ -16,16 +16,7 @@ const SharePassageModal = ({ novelId, page, content, imageId, onClose }) => {
   const currentImage = currentImages && currentImages.length > 0 ? currentImages[0] : null;
 
   // Construct the image URL correctly - the imageUrl in Redux might already have the full path
-  let currentImageUrl = null;
-  if (currentImage && currentImage.imageUrl) {
-    if (currentImage.imageUrl.startsWith('http')) {
-      currentImageUrl = currentImage.imageUrl;
-    } else {
-      // Clean up the path and ensure it's properly formatted
-      const cleanPath = currentImage.imageUrl.replace(/\\/g, '/').replace(/^\/+/, '');
-      currentImageUrl = `${import.meta.env.VITE_API_URL}/${cleanPath}`;
-    }
-  }
+  let currentImageUrl = currentImage?.imageUrl || null;
 
   // For debugging
   console.log('Current image from Redux:', currentImage);
@@ -89,8 +80,7 @@ const SharePassageModal = ({ novelId, page, content, imageId, onClose }) => {
           }
 
           // Make a direct API call to the backend
-          const apiBase = import.meta.env.VITE_API_URL.replace(/\/api$/, '');
-          const response = await fetch(`${apiBase}/api/sharing/preview`, {
+          const response = await fetch(`${import.meta.env.VITE_API_URL}/api/sharing/preview`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -108,7 +98,7 @@ const SharePassageModal = ({ novelId, page, content, imageId, onClose }) => {
 
           // Set the preview image URL
           if (data.previewUrl) {
-            setSocialImagePreview(`${apiBase}/${data.previewUrl}`);
+            setSocialImagePreview(`${import.meta.env.VITE_API_URL}/${data.previewUrl}`);
           } else if (data.fullUrl) {
             setSocialImagePreview(data.fullUrl);
           } else {

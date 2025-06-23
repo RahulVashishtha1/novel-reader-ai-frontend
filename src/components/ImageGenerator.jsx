@@ -103,7 +103,7 @@ const ImageGenerator = ({ novelId, page }) => {
             {currentImages.map((image) => (
               <div key={image._id} className="border border-gray-200 rounded-md p-2">
                 <img
-                  src={`${apiBase}/${image.imageUrl}`}
+                  src={image.imageUrl}
                   alt={`Generated for page ${image.page}`}
                   className="w-full h-auto rounded-md"
                 />
