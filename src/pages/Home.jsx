@@ -27,105 +27,118 @@ const Home = () => {
   return (
     <div className="min-h-screen themed-bg-secondary">
       {/* Hero Section */}
-      <section className="relative min-h-[90vh] flex items-center px-4 sm:px-6 lg:px-8 overflow-hidden">
-        {/* Animated background elements */}
-        <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 themed-bg-secondary"></div>
-          <div className="absolute top-20 left-10 w-64 h-64 themed-accent opacity-10 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-20 right-10 w-64 h-64 themed-accent opacity-10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
+      <section className="relative min-h-[calc(100vh-64px)] flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 overflow-hidden">
+        {/* Modern, vibrant SVG background shapes and colorful dots */}
+        <div className="absolute inset-0 pointer-events-none -z-10">
+          {/* Layered SVG blobs for depth and color (higher opacity, more saturated) */}
+          <svg className="absolute top-[-60px] left-[-80px] w-[340px] h-[340px] opacity-90" viewBox="0 0 400 400" fill="none"><path d="M320,120Q340,200,260,260Q180,320,100,260Q20,200,100,120Q180,40,260,120Q320,180,320,120Z" fill="#6366f1"/></svg>
+          <svg className="absolute bottom-[-80px] right-[-60px] w-[300px] h-[300px] opacity-90" viewBox="0 0 400 400" fill="none"><path d="M300,200Q320,280,240,320Q160,360,80,320Q0,280,80,200Q160,120,240,200Q320,280,300,200Z" fill="#d946ef"/></svg>
+          <svg className="absolute top-1/2 left-1/2 w-[180px] h-[180px] opacity-80" style={{transform:'translate(-50%,-50%)'}} viewBox="0 0 400 400" fill="none"><path d="M200,80Q240,160,160,240Q80,320,200,320Q320,320,240,240Q160,160,200,80Z" fill="#fbbf24"/></svg>
+          {/* Colorful blurred dots/drops (higher opacity, drop shadow) */}
+          <div className="absolute top-10 left-1/2 w-16 h-16 bg-emerald-400 opacity-90 rounded-full blur-2xl shadow-lg" style={{transform:'translateX(-50%)'}}></div>
+          <div className="absolute bottom-20 right-1/3 w-10 h-10 bg-fuchsia-500 opacity-90 rounded-full blur-xl shadow-md"></div>
+          <div className="absolute top-1/3 left-1/4 w-8 h-8 bg-yellow-400 opacity-90 rounded-full blur-lg shadow-md"></div>
+          <div className="absolute bottom-10 left-1/5 w-14 h-14 bg-indigo-500 opacity-80 rounded-full blur-xl shadow-lg"></div>
+          <div className="absolute top-1/4 right-1/4 w-12 h-12 bg-pink-500 opacity-90 rounded-full blur-lg shadow-md"></div>
         </div>
-
-        <div className="max-w-7xl mx-auto relative z-10 w-full py-16">
-          <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 themed-text-primary animate-fadeIn leading-tight">
-              VisNovel
-            </h1>
-            <p className="text-xl md:text-2xl mb-10 themed-text-secondary max-w-3xl mx-auto animate-fadeIn" style={{animationDelay: '0.3s'}}>
-              AI-Powered Novel Reader with Intelligent Image Generation
-            </p>
-            <p className="text-lg mb-10 themed-text-secondary max-w-2xl mx-auto animate-fadeIn" style={{animationDelay: '0.5s'}}>
-              Transform your reading experience with AI-generated illustrations, smart bookmarks, and personalized reading analytics.
-            </p>
-
-            <div className="flex flex-wrap justify-center gap-4 mb-10">
-              {isAuthenticated ? (
+        <div className="w-full max-w-2xl mx-auto py-10 md:py-16 text-center flex flex-col items-center justify-center z-10">
+          <h1 className="text-4xl md:text-6xl font-extrabold mb-4 themed-text-primary animate-fadeIn leading-tight" style={{letterSpacing: '0.01em'}}>
+            VisNovel
+          </h1>
+          <div className="flex justify-center mb-4">
+            <span className="inline-block h-1 w-20 rounded-full themed-accent-bg opacity-70"></span>
+          </div>
+          <p className="text-xl md:text-2xl mb-6 themed-text-secondary animate-fadeIn font-medium" style={{animationDelay: '0.3s'}}>
+            AI-Powered Novel Reader with Intelligent Image Generation
+          </p>
+          <p className="text-base mb-8 themed-text-secondary animate-fadeIn" style={{animationDelay: '0.5s'}}>
+            Transform your reading experience with AI-generated illustrations, smart bookmarks, and personalized reading analytics.
+          </p>
+          <div className="flex flex-wrap justify-center gap-4 mb-8">
+            {isAuthenticated ? (
+              <Link
+                to="/bookshelf"
+                className="px-8 py-3 themed-accent-bg hover:opacity-90 rounded-xl font-semibold text-lg transition-all duration-300 shadow-md transform hover:-translate-y-1 cursor-pointer animate-fadeIn text-white"
+                style={{animationDelay: '0.6s'}}
+              >
+                Go to Bookshelf <FaArrowRight className="ml-2 inline animate-bounceX" />
+              </Link>
+            ) : (
+              <>
                 <Link
-                  to="/bookshelf"
-                  className="px-8 py-4 themed-accent-bg hover:opacity-90 rounded-md font-medium text-lg transition-all duration-300 shadow-lg transform hover:-translate-y-1 cursor-pointer animate-fadeIn text-white"
+                  to="/register"
+                  className="px-8 py-3 themed-accent-bg hover:opacity-90 rounded-xl font-semibold text-lg transition-all duration-300 shadow-md transform hover:-translate-y-1 cursor-pointer animate-fadeIn text-white"
                   style={{animationDelay: '0.6s'}}
                 >
-                  Go to Bookshelf <FaArrowRight className="ml-2 inline animate-bounceX" />
+                  Start Reading Free
                 </Link>
-              ) : (
-                <>
-                  <Link
-                    to="/register"
-                    className="px-8 py-4 themed-accent-bg hover:opacity-90 rounded-md font-medium text-lg transition-all duration-300 shadow-lg transform hover:-translate-y-1 cursor-pointer animate-fadeIn text-white"
-                    style={{animationDelay: '0.6s'}}
-                  >
-                    Start Reading Free
-                  </Link>
-                  <Link
-                    to="/login"
-                    className="px-8 py-4 themed-bg-primary themed-text-primary themed-border border hover:border-themed-accent rounded-md font-medium text-lg transition-all duration-300 cursor-pointer animate-fadeIn"
-                    style={{animationDelay: '0.7s'}}
-                  >
-                    Sign In
-                  </Link>
-                </>
-              )}
-            </div>
-
-            {/* Stats Preview */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-              <StatCard number="10K+" label="Books Read" delay="0.8s" />
-              <StatCard number="50K+" label="Images Generated" delay="0.9s" />
-              <StatCard number="100K+" label="Happy Readers" delay="1.0s" />
-            </div>
+                <Link
+                  to="/login"
+                  className="px-8 py-3 themed-bg-primary themed-text-primary themed-border border hover:border-themed-accent rounded-xl font-semibold text-lg transition-all duration-300 cursor-pointer animate-fadeIn"
+                  style={{animationDelay: '0.7s'}}
+                >
+                  Sign In
+                </Link>
+              </>
+            )}
+          </div>
+          {/* Stats Preview */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+            <StatCard number="10K+" label="Books Read" delay="0.8s" iconBg="bg-blue-500" icon={<FaBook className='text-white'/>} />
+            <StatCard number="50K+" label="Images Generated" delay="0.9s" iconBg="bg-pink-500" icon={<FaImage className='text-white'/>} />
+            <StatCard number="100K+" label="Happy Readers" delay="1.0s" iconBg="bg-yellow-400" icon={<FaUser className='text-white'/>} />
           </div>
         </div>
       </section>
+      {/* Elegant Divider */}
+      <div className="w-full flex justify-center my-4 md:my-8">
+        <div className="h-[2px] w-2/3 max-w-2xl themed-accent-bg opacity-20 rounded-full"></div>
+      </div>
 
       {/* Features Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 themed-bg-primary relative overflow-hidden">
-        {/* Animated background elements */}
-        <div className="absolute top-20 right-10 w-72 h-72 themed-accent opacity-5 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 left-10 w-72 h-72 themed-accent opacity-5 rounded-full blur-3xl animate-pulse" style={{animationDelay: '2s'}}></div>
-
+      <section className="py-12 px-4 sm:px-6 lg:px-8 themed-bg-primary relative overflow-hidden">
+        {/* Subtle accent shape */}
+        <div className="absolute top-20 right-10 w-48 h-48 themed-accent opacity-10 rounded-full blur-2xl animate-pulse"></div>
+        <div className="absolute bottom-20 left-10 w-48 h-48 themed-accent opacity-10 rounded-full blur-2xl animate-pulse" style={{animationDelay: '2s'}}></div>
         <div className="max-w-7xl mx-auto relative z-10">
-          <div className="text-center mb-12">
-            <div className="inline-block px-4 py-1 themed-accent-bg rounded-full text-white text-sm font-medium mb-4 animate-fadeIn">POWERFUL FEATURES</div>
+          <div className="text-center mb-10">
+            <div className="inline-block px-4 py-1 themed-accent-bg rounded-full text-white text-base font-semibold mb-3 animate-fadeIn shadow-md">POWERFUL FEATURES</div>
             <h2 className="text-3xl font-bold themed-text-primary animate-fadeIn" style={{animationDelay: '0.2s'}}>Everything You Need for Reading</h2>
           </div>
-
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             <FeatureCard
-              icon={<FaBook className="text-4xl themed-accent" />}
+              iconBg="bg-blue-500"
+              icon={<FaBook className="text-2xl text-white" />}
               title="Smart Novel Upload"
               description="Upload .txt and .epub files with automatic formatting and pagination."
             />
             <FeatureCard
-              icon={<FaImage className="text-4xl themed-accent" />}
+              iconBg="bg-pink-500"
+              icon={<FaImage className="text-2xl text-white" />}
               title="AI Image Generation"
               description="Generate contextual illustrations for each page to enhance your reading experience."
             />
             <FeatureCard
-              icon={<FaBookmark className="text-4xl themed-accent" />}
+              iconBg="bg-green-500"
+              icon={<FaBookmark className="text-2xl text-white" />}
               title="Smart Bookmarks"
               description="Save important passages and create personal notes with ease."
             />
             <FeatureCard
-              icon={<FaChartLine className="text-4xl themed-accent" />}
+              iconBg="bg-yellow-400"
+              icon={<FaChartLine className="text-2xl text-white" />}
               title="Reading Analytics"
               description="Track your reading progress, speed, and time spent on each book."
             />
             <FeatureCard
-              icon={<FaUser className="text-4xl themed-accent" />}
+              iconBg="bg-purple-500"
+              icon={<FaUser className="text-2xl text-white" />}
               title="Personal Bookshelf"
               description="Organize your digital library with custom categories and tags."
             />
             <FeatureCard
-              icon={<FaShieldAlt className="text-4xl themed-accent" />}
+              iconBg="bg-orange-400"
+              icon={<FaShieldAlt className="text-2xl text-white" />}
               title="Secure & Private"
               description="Your books and reading data are encrypted and accessible only to you."
             />
@@ -169,6 +182,7 @@ const Home = () => {
             <div className="relative z-10 w-full sm:w-1/3 flex justify-center">
               <PlatformCard
                 icon={FaDesktop}
+                iconBg="bg-blue-500"
                 title="Desktop"
                 description="Full-featured reading experience on your computer"
                 delay="0.3s"
@@ -177,6 +191,7 @@ const Home = () => {
             <div className="relative z-10 w-full sm:w-1/3 flex justify-center">
               <PlatformCard
                 icon={FaTabletAlt}
+                iconBg="bg-purple-500"
                 title="Tablet"
                 description="Perfect for comfortable reading on tablets"
                 delay="0.4s"
@@ -185,6 +200,7 @@ const Home = () => {
             <div className="relative z-10 w-full sm:w-1/3 flex justify-center">
               <PlatformCard
                 icon={FaMobileAlt}
+                iconBg="bg-pink-500"
                 title="Mobile"
                 description="Read on the go with mobile-optimized interface"
                 delay="0.5s"
@@ -207,10 +223,10 @@ const Home = () => {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <UseCaseCard title="Fiction Readers" delay="0.3s" />
-            <UseCaseCard title="Students" delay="0.4s" />
-            <UseCaseCard title="Book Clubs" delay="0.5s" />
-            <UseCaseCard title="Researchers" delay="0.6s" />
+            <UseCaseCard title="Fiction Readers" delay="0.3s" iconBg="bg-blue-500" icon={<FaBook className='text-white'/>} />
+            <UseCaseCard title="Students" delay="0.4s" iconBg="bg-green-500" icon={<FaChartLine className='text-white'/>} />
+            <UseCaseCard title="Book Clubs" delay="0.5s" iconBg="bg-pink-500" icon={<FaUser className='text-white'/>} />
+            <UseCaseCard title="Researchers" delay="0.6s" iconBg="bg-purple-500" icon={<FaCheck className='text-white'/>} />
           </div>
         </div>
       </section>
@@ -305,74 +321,73 @@ const Home = () => {
 };
 
 // Helper Components
-function FeatureCard({ icon, title, description }) {
+function FeatureCard({ icon, iconBg, title, description }) {
   return (
-    <div className="themed-bg-secondary rounded-lg p-6 themed-border border hover:border-themed-accent transition-all duration-300 hover:shadow-lg transform hover:-translate-y-2 animate-fadeIn">
-      <div className="mb-4 transform transition-transform duration-300 group-hover:scale-110">{icon}</div>
-      <h3 className="text-xl font-semibold mb-2 themed-text-primary">{title}</h3>
-      <p className="themed-text-secondary">{description}</p>
+    <div className="themed-bg-secondary/80 rounded-xl p-6 themed-border border hover:border-themed-accent transition-all duration-300 hover:shadow-xl transform hover:-translate-y-2 animate-fadeIn backdrop-blur-md shadow-md group flex flex-col items-start">
+      <div className={`mb-4 w-12 h-12 flex items-center justify-center rounded-full shadow-md ${iconBg}`}>{icon}</div>
+      <h3 className="text-xl font-bold mb-2 themed-text-primary">{title}</h3>
+      <p className="themed-text-secondary text-base font-medium">{description}</p>
     </div>
   );
 }
 
 function StepCard({ number, title, description, isLast }) {
   return (
-    <div className="themed-bg-primary rounded-lg p-6 themed-border border hover:border-themed-accent transition-all duration-300 hover:shadow-lg transform hover:-translate-y-2 animate-fadeIn flex flex-col items-start relative" style={{animationDelay: `${0.3 + parseInt(number) * 0.1}s`}}>
+    <div className="themed-bg-primary/80 rounded-2xl p-8 themed-border border hover:border-themed-accent transition-all duration-300 hover:shadow-xl transform hover:-translate-y-2 animate-fadeIn flex flex-col items-start relative backdrop-blur-md shadow-md" style={{animationDelay: `${0.3 + parseInt(number) * 0.1}s`}}>
       {/* Step number circle */}
-      <div className="relative z-10 flex items-center justify-center w-10 h-10 rounded-full themed-accent-bg border themed-accent-border font-bold text-lg shadow-lg text-white mb-2 md:mb-0 md:absolute md:-top-5 md:-left-5">
+      <div className="relative z-10 flex items-center justify-center w-12 h-12 rounded-full themed-accent-bg border themed-accent-border font-extrabold text-2xl shadow-lg text-white mb-2 md:mb-0 md:absolute md:-top-6 md:-left-6">
         {number}
       </div>
-      <div className="pl-0 md:pl-8 w-full">
-        <h3 className="text-xl font-semibold mb-2 themed-text-primary">{title}</h3>
-        <p className="themed-text-secondary">{description}</p>
+      <div className="pl-0 md:pl-10 w-full">
+        <h3 className="text-2xl font-bold mb-2 themed-text-primary">{title}</h3>
+        <p className="themed-text-secondary text-base font-medium">{description}</p>
       </div>
     </div>
   );
 }
 
-function PlatformCard({ icon: Icon, title, description, delay }) {
+function PlatformCard({ icon: Icon, iconBg, title, description, delay }) {
   return (
     <div
-      className="themed-bg-primary p-4 sm:p-6 rounded-lg themed-border border hover:border-themed-accent transition-all duration-300 hover:shadow-lg hover:shadow-themed-accent/10 transform hover:-translate-y-2 animate-fadeIn w-full max-w-sm"
+      className="themed-bg-primary/80 p-6 rounded-2xl themed-border border hover:border-themed-accent transition-all duration-300 hover:shadow-xl hover:shadow-themed-accent/10 transform hover:-translate-y-2 animate-fadeIn w-full max-w-sm backdrop-blur-md shadow-lg"
       style={{ animationDelay: delay }}
     >
-      <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto themed-accent-bg rounded-full flex items-center justify-center mb-3 sm:mb-4 shadow-lg">
-        <Icon color="white" size={24} className="sm:w-8 sm:h-8" />
+      <div className={`w-16 h-16 mx-auto flex items-center justify-center mb-4 shadow-lg rounded-full ${iconBg}`}>
+        <Icon color="white" size={32} className="w-8 h-8" />
       </div>
-      <p className="text-base sm:text-lg font-medium themed-text-primary text-center">{title}</p>
-      <p className="mt-2 themed-text-secondary text-xs sm:text-sm text-center">{description}</p>
+      <p className="text-lg font-bold themed-text-primary text-center">{title}</p>
+      <p className="mt-2 themed-text-secondary text-base text-center font-medium">{description}</p>
     </div>
   );
 }
 
-function UseCaseCard({ title, delay }) {
+function UseCaseCard({ title, delay, iconBg, icon }) {
   return (
-    <div className="themed-bg-primary rounded-lg p-4 themed-border border hover:border-themed-accent transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1 animate-fadeIn" style={{animationDelay: delay}}>
-      <div className="flex items-center">
-        <FaCheck className="themed-accent mr-2" />
-        <h3 className="font-medium themed-text-primary">{title}</h3>
-      </div>
+    <div className="themed-bg-primary/80 rounded-2xl p-6 themed-border border hover:border-themed-accent transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1 animate-fadeIn backdrop-blur-md shadow-md flex items-center gap-3" style={{animationDelay: delay}}>
+      <div className={`w-10 h-10 flex items-center justify-center rounded-full shadow-md ${iconBg}`}>{icon}</div>
+      <h3 className="font-semibold themed-text-primary text-lg">{title}</h3>
     </div>
   );
 }
 
-function StatCard({ number, label, delay }) {
+function StatCard({ number, label, delay, iconBg, icon }) {
   return (
-    <div className="text-center animate-fadeIn" style={{animationDelay: delay}}>
-      <div className="text-3xl font-bold themed-accent mb-2">{number}</div>
-      <div className="themed-text-secondary">{label}</div>
+    <div className="text-center animate-fadeIn px-6 py-8 rounded-xl shadow-lg themed-bg-primary/80 backdrop-blur-md border themed-border flex flex-col items-center" style={{animationDelay: delay}}>
+      <div className={`mb-3 w-12 h-12 flex items-center justify-center rounded-full shadow-md ${iconBg}`}>{icon}</div>
+      <div className="text-4xl font-extrabold themed-accent mb-2 drop-shadow-md">{number}</div>
+      <div className="themed-text-secondary text-lg font-semibold">{label}</div>
     </div>
   );
 }
 
 function FaqItem({ question, answer, delay, isOpen, onToggle }) {
   return (
-    <div className="themed-border border rounded-lg overflow-hidden animate-fadeIn hover:border-themed-accent transition-all duration-300" style={{animationDelay: delay}}>
+    <div className="themed-border border rounded-2xl overflow-hidden animate-fadeIn hover:border-themed-accent transition-all duration-300 backdrop-blur-md shadow-md themed-bg-primary/80" style={{animationDelay: delay}}>
       <button
-        className="w-full px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center themed-bg-primary hover:opacity-90 text-left cursor-pointer"
+        className="w-full px-6 py-4 flex justify-between items-center themed-bg-primary/80 hover:opacity-95 text-left cursor-pointer font-semibold text-base rounded-t-2xl"
         onClick={onToggle}
       >
-        <span className="font-medium themed-text-primary text-sm sm:text-base pr-2">{question}</span>
+        <span className="themed-text-primary pr-2">{question}</span>
         <HiOutlineChevronDown className={`transition-transform duration-200 themed-accent flex-shrink-0 ${isOpen ? 'transform rotate-180' : ''}`} />
       </button>
       <div
@@ -380,8 +395,8 @@ function FaqItem({ question, answer, delay, isOpen, onToggle }) {
           isOpen ? 'max-h-none opacity-100' : 'max-h-0 opacity-0'
         }`}
       >
-        <div className="px-4 sm:px-6 py-3 sm:py-4 themed-bg-secondary">
-          <p className="themed-text-secondary text-sm sm:text-base leading-relaxed">{answer}</p>
+        <div className="px-6 py-4 themed-bg-secondary/80 rounded-b-2xl">
+          <p className="themed-text-secondary text-base leading-relaxed font-medium">{answer}</p>
         </div>
       </div>
     </div>
